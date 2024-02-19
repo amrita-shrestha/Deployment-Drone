@@ -42,8 +42,8 @@ def keycloakService():
             "image": KEYCLOAK,
             "detach": True,
             "environment": {
-                "OCIS_DOMAIN": "host.docker.internal:9200",
-                "KC_HOSTNAME": "keycloak:8080",
+                "OCIS_DOMAIN": "ocis:9200",
+                "KC_HOSTNAME": "keycloak:8443",
                 "KC_DB": "postgres",
                 "KC_DB_URL": "jdbc:postgresql://postgres:5432/keycloak",
                 "KC_DB_USERNAME": "keycloak",
@@ -51,19 +51,22 @@ def keycloakService():
                 "KC_FEATURES": "impersonation",
                 "KEYCLOAK_ADMIN": "admin",
                 "KEYCLOAK_ADMIN_PASSWORD": "admin",
+                "KC_HTTPS_CERTIFICATE_FILE": "keycloakcrt.pem",
+                "KC_HTTPS_CERTIFICATE_KEY_FILE": "keycloakkey.pem",
             },
             "commands": [
                 "ls -al",
                 "mkdir -p /opt/keycloak/data/import",
                 "cp ocis-realm.dist.json /opt/keycloak/data/import/ocis-realm.json",
-                "/opt/keycloak/bin/kc.sh start-dev --proxy edge --spi-connections-http-client-default-disable-trust-manager=true --import-realm --health-enabled=true",
+                "openssl req -x509  -newkey rsa:2048 -keyout keycloakkey.pem -out keycloakcrt.pem -nodes -days 365 -subj '/CN=keycloak'",
+                "/opt/keycloak/bin/kc.sh start-dev --proxy edge --spi-connections-http-client-default-disable-trust-manager=false --import-realm --health-enabled=true",
             ],
         },
         {
             "name": "wait-for-keycloak",
             "image": OC_CI_WAIT_FOR,
             "commands": [
-                "wait-for -it keycloak:8080 -t 300",
+                "wait-for -it keycloak:8443 -t 300",
             ],
         },
     ]
@@ -76,7 +79,7 @@ def ocisService():
         "IDM_ADMIN_PASSWORD": "admin",  # override the random admin password from `ocis init`
         "PROXY_AUTOPROVISION_ACCOUNTS": "true",
         "PROXY_ROLE_ASSIGNMENT_DRIVER": "oidc",
-        "OCIS_OIDC_ISSUER": "http://keycloak:8080/realms/oCIS",
+        "OCIS_OIDC_ISSUER": "https://keycloak:8443/realms/oCIS",
         "PROXY_OIDC_REWRITE_WELLKNOWN": "true",
         "WEB_OIDC_CLIENT_ID": "web",
         "PROXY_USER_OIDC_CLAIM": "preferred_username",
@@ -85,8 +88,6 @@ def ocisService():
         "OCIS_EXCLUDE_RUN_SERVICES": "idp",
         "GRAPH_ASSIGN_DEFAULT_USER_ROLE": "false",
         "GRAPH_USERNAME_MATCH": "none",
-        "WEB_ASSET_PATH": "/home/amrita/yuna/owncloud/web/dist",
-        "WEB_UI_CONFIG_FILE": "/home/amrita/yuna/owncloud/web/tests/drone/config-ocis.json",
     }
 
     return [
@@ -96,7 +97,6 @@ def ocisService():
             "detach": True,
             "environment": environment,
             "commands": [
-                "ls -al /home/amrita/yuna/owncloud/web",
                 "%s init --insecure true" % ocis_bin,
                 "%s server" % ocis_bin,
             ],
@@ -151,10 +151,10 @@ def e2e_tests():
                 "RETRY": "1",
                 "REPORT_TRACING": "true",
                 "KEYCLOAK": "true",
-                "KEYCLOAK_HOST": "http://keycloak:8080",
+                "KEYCLOAK_HOST": "https://keycloak:8443",
             },
             "commands": [
-                "sleep 10",
+                "cd web",
                 "pnpm test:e2e:cucumber tests/e2e/cucumber/features/journeys/kindergarten.feature",
             ],
         },
@@ -165,7 +165,7 @@ def main(ctx):
         "kind": "pipeline",
         "type": "docker",
         "name": "start-services",
-        "steps": buildOcis() + keycloakService() + ocisService() + e2e_tests(),
+        "steps": keycloakService() + ocisService() + e2e_tests(),
         "services": postgresService(),
         "trigger": {
             "ref": [
