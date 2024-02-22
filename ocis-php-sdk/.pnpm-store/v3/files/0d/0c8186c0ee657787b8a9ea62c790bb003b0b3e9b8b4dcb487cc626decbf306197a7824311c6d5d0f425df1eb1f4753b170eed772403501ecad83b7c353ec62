@@ -1,0 +1,14 @@
+import _extends from "@babel/runtime/helpers/extends";
+import React from 'react';
+export var MainContext = React.createContext({
+  aside: null
+});
+export function withMain(Component) {
+  return function ComponentWithBase(props) {
+    return React.createElement(MainContext.Consumer, null, function (m) {
+      return React.createElement(Component, _extends({
+        aside: m.aside
+      }, props));
+    });
+  };
+}

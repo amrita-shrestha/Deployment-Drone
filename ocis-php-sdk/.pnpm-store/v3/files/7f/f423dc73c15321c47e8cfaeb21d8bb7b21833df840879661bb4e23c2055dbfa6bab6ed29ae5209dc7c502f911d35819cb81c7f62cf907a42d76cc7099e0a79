@@ -1,0 +1,178 @@
+import _classCallCheck from "@babel/runtime/helpers/classCallCheck";
+import _createClass from "@babel/runtime/helpers/createClass";
+import _possibleConstructorReturn from "@babel/runtime/helpers/possibleConstructorReturn";
+import _getPrototypeOf from "@babel/runtime/helpers/getPrototypeOf";
+import _assertThisInitialized from "@babel/runtime/helpers/assertThisInitialized";
+import _inherits from "@babel/runtime/helpers/inherits";
+import _defineProperty from "@babel/runtime/helpers/defineProperty";
+
+function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); keys.push.apply(keys, symbols); } return keys; }
+
+function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; if (i % 2) { ownKeys(Object(source), true).forEach(function (key) { _defineProperty(target, key, source[key]); }); } else if (Object.getOwnPropertyDescriptors) { Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)); } else { ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } } return target; }
+
+import React from 'react';
+import PropTypes from 'prop-types';
+import classNames from 'classnames';
+import { withStyles } from '@material-ui/core/styles';
+import Hidden from '@material-ui/core/Hidden';
+import { MainContext } from './MainContext';
+import { withBase } from '../BaseContainer/BaseContext';
+import { embeddedShape } from '../shapes';
+import GlueEmbed from './GlueEmbed';
+var asideWidth = 300;
+
+var styles = function styles(theme) {
+  return {
+    root: {
+      flex: 1,
+      display: 'flex'
+    },
+    main: {
+      flex: 1,
+      display: 'flex'
+    },
+    aside: {
+      zIndex: 1,
+      display: 'flex',
+      width: asideWidth,
+      position: 'relative',
+      transition: theme.transitions.create('margin', {
+        easing: theme.transitions.easing.sharp,
+        duration: theme.transitions.duration.leavingScreen
+      }),
+      marginRight: 0,
+      boxSizing: 'border-box',
+      borderLeft: "1px solid ".concat(theme.palette.divider)
+    },
+    asideShift: {
+      transition: theme.transitions.create('margin', {
+        easing: theme.transitions.easing.easeOut,
+        duration: theme.transitions.duration.enteringScreen
+      }),
+      marginRight: -1 * asideWidth
+    },
+    asideFrame: {
+      border: 0,
+      flex: 1,
+      display: 'none'
+    },
+    active: {
+      display: 'inherit'
+    }
+  };
+};
+
+var MainContainer =
+/*#__PURE__*/
+function (_React$PureComponent) {
+  _inherits(MainContainer, _React$PureComponent);
+
+  function MainContainer(props) {
+    var _this;
+
+    _classCallCheck(this, MainContainer);
+
+    _this = _possibleConstructorReturn(this, _getPrototypeOf(MainContainer).call(this, props));
+
+    _defineProperty(_assertThisInitialized(_this), "handleLoadAside", function (app, href) {
+      if (!app || !app.name || !href) {
+        console.warn('ignoring invalid load aside app', app); // eslint-disable-line no-console
+
+        return;
+      }
+
+      var _this$state = _this.state,
+          apps = _this$state.apps,
+          active = _this$state.active;
+
+      if (!apps[app.name]) {
+        _this.setState({
+          apps: _objectSpread({}, apps, _defineProperty({}, app.name, _objectSpread({}, app, {
+            src: href
+          }))),
+          active: app.name
+        });
+      } else {
+        _this.setState({
+          active: active !== app.name ? app.name : null
+        });
+      }
+    });
+
+    _this.state = {
+      apps: {},
+      active: null,
+      value: {
+        aside: {
+          load: _this.handleLoadAside
+        }
+      }
+    };
+    return _this;
+  }
+
+  _createClass(MainContainer, [{
+    key: "render",
+    value: function render() {
+      var _this$props = this.props,
+          children = _this$props.children,
+          classes = _this$props.classes,
+          embedded = _this$props.embedded;
+      var _this$state2 = this.state,
+          active = _this$state2.active,
+          apps = _this$state2.apps;
+      var asideOpen = !!active; // NOTE(longsleep): Embed apps using Glue.
+
+      return React.createElement(MainContext.Provider, {
+        value: this.state.value
+      }, React.createElement("div", {
+        className: classes.root
+      }, React.createElement("div", {
+        className: classes.main
+      }, children), (!embedded || !embedded.enabled) && React.createElement(Hidden, {
+        mdDown: true
+      }, React.createElement("div", {
+        className: classNames(classes.aside, _defineProperty({}, classes.asideShift, !asideOpen))
+      }, Object.values(apps).map(function (app) {
+        var hidden = app.name !== active;
+        return React.createElement(GlueEmbed, {
+          key: app.name,
+          className: classNames(classes.asideFrame, _defineProperty({}, classes.active, !hidden)),
+          url: app.src,
+          hidden: hidden,
+          timeout: 30000,
+          GlueOptions: app.options
+        });
+      })))));
+    }
+  }]);
+
+  return MainContainer;
+}(React.PureComponent);
+
+MainContainer.propTypes = undefined !== "production" ? {
+  /**
+   * The content of the component.
+   */
+  children: PropTypes.node.isRequired,
+
+  /**
+   * Override or extend the styles applied to the component.
+   */
+  classes: PropTypes.object.isRequired,
+
+  /**
+   * The app configuration object. This value is made available by the
+   * integrated BaseContext.
+   */
+  config: PropTypes.object,
+
+  /**
+   * The app embedded object. This value is made available by the
+   * integrated BaseContext.
+   */
+  embedded: embeddedShape
+} : {};
+export default withStyles(styles, {
+  name: 'KpopMainContainer'
+})(withBase(MainContainer));

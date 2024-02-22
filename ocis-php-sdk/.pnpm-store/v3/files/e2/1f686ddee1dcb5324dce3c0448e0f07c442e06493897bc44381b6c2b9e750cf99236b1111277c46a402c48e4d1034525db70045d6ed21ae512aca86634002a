@@ -1,0 +1,29 @@
+/*!
+ * Copyright 2019 Kopano and its contributors
+ *
+ * Use of this source code is governed by a MIT license
+ * that can be found in the LICENSE.txt file.
+ *
+ * @author   Kopano <https://kopano.com>
+ * @license  MIT
+ * @preserve
+ */
+import { Glue, Controller, IEmbeddOptions, IEnableOptions } from './glue';
+/**
+ * Embeds the provided url into the provided container by creating an iframe
+ * which gets appended as child to the provided container.
+ *
+ * @param url URL of the app to be embedded with Glue.
+ * @param container DOM node where the iframe element is appended as child.
+ * @param options Embedded options.
+ */
+declare function embed(url: string, container: Element, options?: IEmbeddOptions): Promise<Glue>;
+/**
+ * Enables glue for the provided sourceWindow with options.
+ *
+ * @param sourceWindow Window element of the app which is using Glue embed.
+ * @param options Enable options.
+ */
+declare function enable(sourceWindow?: Window, options?: IEnableOptions): Promise<Glue>;
+export { Glue, Controller, embed, enable, };
+export default Glue;

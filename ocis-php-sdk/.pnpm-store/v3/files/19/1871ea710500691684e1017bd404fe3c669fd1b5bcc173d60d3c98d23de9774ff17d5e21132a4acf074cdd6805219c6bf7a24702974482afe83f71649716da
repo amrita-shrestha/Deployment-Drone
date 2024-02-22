@@ -1,0 +1,18 @@
+import _extends from "@babel/runtime/helpers/extends";
+import React from 'react';
+export var BaseContext = React.createContext({
+  // default values are empty.
+  config: {},
+  embedded: {}
+});
+export function withBase(Component) {
+  return function ComponentWithBase(props) {
+    return React.createElement(BaseContext.Consumer, null, function (b) {
+      return React.createElement(Component, _extends({}, props, {
+        config: b.config,
+        embedded: b.embedded
+      }));
+    });
+  };
+}
+export default BaseContext;

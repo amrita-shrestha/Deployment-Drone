@@ -1,0 +1,82 @@
+import _extends from "@babel/runtime/helpers/extends";
+import _objectWithoutProperties from "@babel/runtime/helpers/objectWithoutProperties";
+import React from 'react';
+import PropTypes from 'prop-types';
+import { FormattedMessage } from 'react-intl';
+import { withStyles } from '@material-ui/core/styles';
+import DialogContent from '@material-ui/core/DialogContent';
+import Typography from '@material-ui/core/Typography';
+import LinearProgress from '@material-ui/core/LinearProgress';
+import LogoDialog from './LogoDialog';
+
+var styles = function styles() {
+  return {
+    spinner: {}
+  };
+};
+
+var _ref =
+/*#__PURE__*/
+React.createElement(Typography, {
+  variant: "subtitle1"
+}, React.createElement(FormattedMessage, {
+  id: "kpop.updateRequiredDialog.message.appIsUpdating",
+  defaultMessage: "Please wait while the app is updating ..."
+}));
+
+var _ref2 =
+/*#__PURE__*/
+React.createElement(LinearProgress, null);
+
+var UpdateRequiredDialog = React.forwardRef(function UpdateRequiredDialog(props, ref) {
+  var classes = props.classes,
+      fullScreen = props.fullScreen,
+      open = props.open,
+      updateAvailable = props.updateAvailable,
+      onReloadClick = props.onReloadClick,
+      other = _objectWithoutProperties(props, ["classes", "fullScreen", "open", "updateAvailable", "onReloadClick"]);
+
+  if (updateAvailable && onReloadClick) {
+    console.info('auto trigger of reload after update became available.'); // eslint-disable-line no-console
+
+    Promise.resolve().then(onReloadClick);
+  }
+
+  return React.createElement(LogoDialog, _extends({
+    fullScreen: fullScreen,
+    open: open,
+    ref: ref,
+    actions: _ref
+  }, other), React.createElement(DialogContent, {
+    className: classes.spinner
+  }, _ref2));
+});
+UpdateRequiredDialog.propTypes = undefined !== "production" ? {
+  /**
+  * Useful to extend the style applied to components.
+  */
+  classes: PropTypes.object.isRequired,
+
+  /**
+   * Callback fired when the reload button is clicked.
+   */
+  onReloadClick: PropTypes.func.isRequired,
+
+  /**
+   * If `true`, the dialog will be full-screen
+   */
+  fullScreen: PropTypes.bool,
+
+  /**
+   * If `true`, the dialog is open.
+   */
+  open: PropTypes.bool.isRequired,
+
+  /**
+   * If `true`, an update is available.
+   */
+  updateAvailable: PropTypes.bool.isRequired
+} : {};
+export default withStyles(styles, {
+  name: 'KpopUpdateRequiredDialog'
+})(UpdateRequiredDialog);

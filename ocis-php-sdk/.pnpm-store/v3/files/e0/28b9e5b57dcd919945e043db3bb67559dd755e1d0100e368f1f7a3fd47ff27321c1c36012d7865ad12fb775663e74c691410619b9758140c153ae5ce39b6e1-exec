@@ -1,0 +1,116 @@
+<testsuite name="Mocha Tests" tests="114" failures="0" errors="0" skipped="1" timestamp="Sat, 15 Apr 2023 09:23:19 GMT" time="17.92">
+<testcase classname="" name="should replace existing license" time="0"/>
+<testcase classname="" name="should exit 1 if the checksum does not match" time="0.526"/>
+<testcase classname="" name="should succeed if no checksum is specified" time="0.516"/>
+<testcase classname="" name="should snip the embedded license out of the README" time="0.518"/>
+<testcase classname="" name="should snip the embedded license in the README to the end." time="0.514"/>
+<testcase classname="bin/license-checker-rseidelsohn" name="should exit 0" time="1.08"/>
+<testcase classname="bin/license-checker-rseidelsohn" name="should exit 1 if it finds a single license type (MIT) license due to --failOn MIT" time="1.141"/>
+<testcase classname="bin/license-checker-rseidelsohn" name="should exit 1 if it finds forbidden licenses license due to --failOn MIT;ISC" time="1.094"/>
+<testcase classname="bin/license-checker-rseidelsohn" name="should give warning about commas if --failOn MIT,ISC is provided" time="1.102"/>
+<testcase classname="license parser" name="should export a function" time="0"/>
+<testcase classname="license parser" name="should throw an error when called with a non-string argument" time="0"/>
+<testcase classname="license parser" name="removes newlines from the argument" time="0.001"/>
+<testcase classname="license parser" name="undefined check" time="0"/>
+<testcase classname="license parser" name="MIT check" time="0.001"/>
+<testcase classname="license parser" name="MIT word check" time="0"/>
+<testcase classname="license parser" name="Non-MIT word check" time="0.001"/>
+<testcase classname="license parser" name="GPL word check" time="0.001"/>
+<testcase classname="license parser" name="Non-GPL word check" time="0.001"/>
+<testcase classname="license parser" name="LGPL word check" time="0"/>
+<testcase classname="license parser" name="BSD check" time="0.001"/>
+<testcase classname="license parser" name="BSD-Source-Code check" time="0"/>
+<testcase classname="license parser" name="BSD word check" time="0"/>
+<testcase classname="license parser" name="Non-BSD word check" time="0.001"/>
+<testcase classname="license parser" name="Apache version check" time="0"/>
+<testcase classname="license parser" name="Apache word check" time="0"/>
+<testcase classname="license parser" name="Non-Apache word check" time="0"/>
+<testcase classname="license parser" name="WTF check" time="0"/>
+<testcase classname="license parser" name="WTF word check" time="0"/>
+<testcase classname="license parser" name="Non-WTF word check" time="0"/>
+<testcase classname="license parser" name="ISC check" time="0"/>
+<testcase classname="license parser" name="Non-ISC word check" time="0.001"/>
+<testcase classname="license parser" name="ISC word check" time="0"/>
+<testcase classname="license parser" name="CC0-1.0 word check" time="0"/>
+<testcase classname="license parser" name="Public Domain check" time="0"/>
+<testcase classname="license parser" name="License at URL check"><skipped/></testcase>
+<testcase classname="license parser" name="License at file check" time="0.001"/>
+<testcase classname="license parser" name="Check for null" time="0"/>
+<testcase classname="license parser SPDX licenses" name="should parse a basic SPDX license" time="0"/>
+<testcase classname="license parser SPDX licenses" name="should parse more complicated license expressions" time="0.001"/>
+<testcase classname="license files detector" name="should export a function" time="0"/>
+<testcase classname="license files detector" name="no files" time="0.001"/>
+<testcase classname="license files detector" name="no license files" time="0.001"/>
+<testcase classname="license files detector" name="one license candidate" time="0.001"/>
+<testcase classname="license files detector" name="multiple license candidates detected in the right order" time="0"/>
+<testcase classname="license files detector" name="extensions have no effect" time="0"/>
+<testcase classname="license files detector" name="lower/upper case has no effect" time="0"/>
+<testcase classname="license files detector" name="LICENSE-MIT gets matched" time="0"/>
+<testcase classname="license files detector" name="only the first LICENSE-* file gets matched" time="0"/>
+<testcase classname="bin/license-checker-rseidelsohn" name="should restrict the output to the provided packages" time="1.143"/>
+<testcase classname="bin/license-checker-rseidelsohn" name="should exclude provided excludedPackages from the output" time="1.076"/>
+<testcase classname="bin/license-checker-rseidelsohn" name="should exclude packages starting with" time="1.073"/>
+<testcase classname="bin/license-checker-rseidelsohn" name="should combine various types of inclusion and exclusions" time="1.105"/>
+<testcase classname="bin/license-checker-rseidelsohn" name="should exclude private packages from the output" time="0.536"/>
+<testcase classname="main tests" name="should load init" time="0"/>
+<testcase classname="main tests" name="should load print" time="0.001"/>
+<testcase classname="main tests should parse local with unknown" name="and give us results" time="0"/>
+<testcase classname="main tests should parse local with unknown" name="and convert to CSV" time="0.001"/>
+<testcase classname="main tests should parse local with unknown" name="and convert to MarkDown" time="0.001"/>
+<testcase classname="main tests should parse local with unknown and custom format" name="and give us results" time="0"/>
+<testcase classname="main tests should parse local with unknown and custom format" name="and convert to CSV" time="0.001"/>
+<testcase classname="main tests should parse local with unknown and custom format" name="and convert to CSV with component prefix" time="0.001"/>
+<testcase classname="main tests should parse local with unknown and custom format" name="and convert to MarkDown" time="0.001"/>
+<testcase classname="main tests should parse local without unknown" name="should give us results" time="0.001"/>
+<testcase classname="main tests should parse direct dependencies only" name="and give us results" time="0"/>
+<testcase classname="main tests should parse local with unknown and excludes" name="should exclude MIT and ISC licensed modules from results" time="0"/>
+<testcase classname="main tests should parse local with excludes containing commas" name="should exclude a license with a comma from the list" time="0"/>
+<testcase classname="main tests should parse local with BSD excludes" name="should exclude BSD-3-Clause" time="0"/>
+<testcase classname="main tests should parse local with Public Domain excludes" name="should exclude Public Domain" time="0"/>
+<testcase classname="main tests should not exclude Custom if not specified in excludes" name="should exclude Public Domain" time="0"/>
+<testcase classname="main tests should exit on given list of onlyAllow licenses" name="should exit on non MIT and ISC licensed modules from results" time="0.001"/>
+<testcase classname="main tests should exit on single onlyAllow license" name="should exit on non ISC licensed modules from results" time="0"/>
+<testcase classname="main tests should not exit on complete list" name="should not exit if list is complete" time="0"/>
+<testcase classname="main tests should exit on given list of failOn licenses" name="should exit on MIT and ISC licensed modules from results" time="0"/>
+<testcase classname="main tests should exit on single failOn license" name="should exit on ISC licensed modules from results" time="0"/>
+<testcase classname="main tests should parse local and handle private modules" name="should recognise private modules" time="0"/>
+<testcase classname="main tests should treat license file over custom urls" name="should recognise a custom license at a url" time="0.002"/>
+<testcase classname="main tests should treat URLs as custom licenses" name="should recognise a custom license at a url" time="0"/>
+<testcase classname="main tests should treat file references as custom licenses" name="should recognise a custom license in a file" time="0"/>
+<testcase classname="main tests error handler" name="should init without errors" time="0.299"/>
+<testcase classname="main tests error handler" name="should init with errors (npm packages not found)" time="0.001"/>
+<testcase classname="main tests should parse with args" name="should handle undefined" time="0"/>
+<testcase classname="main tests should parse with args" name="should handle color undefined" time="0"/>
+<testcase classname="main tests should parse with args" name="should handle direct undefined" time="0"/>
+<testcase classname="main tests should parse with args" name="should handle direct true" time="0"/>
+<testcase classname="main tests should parse with args" name="should disable color on json" time="0"/>
+<testcase classname="main tests should parse with args" name="should disable color on markdown" time="0"/>
+<testcase classname="main tests should parse with args" name="should disable color on csv" time="0"/>
+<testcase classname="main tests should parse with args" name="should disable color on summary" time="0"/>
+<testcase classname="main tests custom formats" name="should create a custom format using customFormat successfully" time="0.342"/>
+<testcase classname="main tests custom formats" name="should create a custom format using customPath" time="0.313"/>
+<testcase classname="main tests custom formats" name="should return data for keys with different names in json vs custom format" time="0.002"/>
+<testcase classname="main tests should output the module location" name="as absolute path" time="0.295"/>
+<testcase classname="main tests should output the module location" name="using only relative paths if the option relativeModulePath is being used" time="0.296"/>
+<testcase classname="main tests should output the location of the license files" name="as absolute paths" time="0.289"/>
+<testcase classname="main tests should output the location of the license files" name="as relative paths when using relativeLicensePath" time="0.29"/>
+<testcase classname="main tests handle copytight statement" name="should output copyright statements when configured in custom format" time="0.31"/>
+<testcase classname="main tests should only list UNKNOWN or guessed licenses successful" name="so we check if there is no license with a star or UNKNOWN found" time="0"/>
+<testcase classname="main tests should list given packages" name="should include only BSD" time="0"/>
+<testcase classname="main tests should not list not given packages" name="should not include Apache" time="0"/>
+<testcase classname="main tests should only list UNKNOWN or guessed licenses with errors (argument missing)" name="so we check if there is no license with a star or UNKNOWN found" time="0"/>
+<testcase classname="main tests should export" name="print a tree" time="0.001"/>
+<testcase classname="main tests should export" name="as tree" time="0"/>
+<testcase classname="main tests should export" name="as csv" time="0"/>
+<testcase classname="main tests should export" name="as csv with partial data" time="0"/>
+<testcase classname="main tests should export" name="as markdown" time="0"/>
+<testcase classname="main tests should export" name="as summary" time="0"/>
+<testcase classname="main tests should export" name="as files" time="0.005"/>
+<testcase classname="main tests should export" name="an Angular CLI like plain vertical format" time="0.001"/>
+<testcase classname="main tests json parsing" name="should parse json successfully (File exists + was json)" time="0"/>
+<testcase classname="main tests json parsing" name="should parse json with errors (File exists + no json)" time="0"/>
+<testcase classname="main tests json parsing" name="should parse json with errors (File not found)" time="0"/>
+<testcase classname="main tests json parsing" name="should parse json with errors (null passed)" time="0"/>
+<testcase classname="main tests limit attributes" name="should filter attributes based on limitAttributes defined" time="0.001"/>
+<testcase classname="main tests limit attributes" name="should keep json as is if no outputColumns defined" time="0"/>
+</testsuite>

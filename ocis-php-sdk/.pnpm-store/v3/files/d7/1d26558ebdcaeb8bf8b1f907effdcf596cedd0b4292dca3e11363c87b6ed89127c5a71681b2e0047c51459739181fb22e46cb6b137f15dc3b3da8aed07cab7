@@ -1,0 +1,25 @@
+export function getHeadersFromConfig(config, user, additionalHeaders) {
+  var headers = new Headers({
+    'Kopano-XSRF': '1'
+  });
+
+  if (user) {
+    if (user.access_token && user.token_type) {
+      headers.set('Authorization', "".concat(user.token_type, " ").concat(user.access_token));
+    } else if (undefined !== 'production' && user.profile.sub) {
+      /*eslint-disable-line no-undef*/
+      // NOTE(longsleep): User pass through is disabled in production builds.
+      headers.set('X-Kopano-UserEntryID', user.profile.sub || '');
+    }
+  }
+
+  if (additionalHeaders) {
+    for (var name in additionalHeaders) {
+      if (additionalHeaders.hasOwnProperty(name)) {
+        headers.set(name, additionalHeaders[name]);
+      }
+    }
+  }
+
+  return headers;
+}

@@ -1,0 +1,50 @@
+import _extends from "@babel/runtime/helpers/extends";
+import _objectWithoutProperties from "@babel/runtime/helpers/objectWithoutProperties";
+import React from 'react';
+import PropTypes from 'prop-types';
+import { FormattedMessage } from 'react-intl';
+import Button from '@material-ui/core/Button';
+import LogoDialog from './LogoDialog';
+
+var _ref =
+/*#__PURE__*/
+React.createElement(FormattedMessage, {
+  id: "kpop.signinDialog.signInButton.text",
+  defaultMessage: "Sign in"
+});
+
+var SigninDialog = React.forwardRef(function SigninDialog(props, ref) {
+  var fullScreen = props.fullScreen,
+      open = props.open,
+      onSigninClick = props.onSigninClick,
+      other = _objectWithoutProperties(props, ["fullScreen", "open", "onSigninClick"]);
+
+  return React.createElement(LogoDialog, _extends({
+    fullScreen: fullScreen,
+    open: open,
+    ref: ref,
+    actions: React.createElement(Button, {
+      variant: "outlined",
+      onClick: onSigninClick,
+      color: "primary",
+      autoFocus: true
+    }, _ref)
+  }, other));
+});
+SigninDialog.propTypes = undefined !== "production" ? {
+  /**
+   * Callback fired when the reload button is clicked.
+   */
+  onSigninClick: PropTypes.func.isRequired,
+
+  /**
+   * If `true`, the dialog will be full-screen
+   */
+  fullScreen: PropTypes.bool,
+
+  /**
+   * If `true`, the dialog is open.
+   */
+  open: PropTypes.bool.isRequired
+} : {};
+export default SigninDialog;

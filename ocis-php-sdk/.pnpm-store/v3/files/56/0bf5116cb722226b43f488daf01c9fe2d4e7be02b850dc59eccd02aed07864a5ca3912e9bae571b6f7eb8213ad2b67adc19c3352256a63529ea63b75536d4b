@@ -1,0 +1,56 @@
+import React from 'react';
+import PropTypes from 'prop-types';
+import errorShape from '../shapes/error';
+import { KPOP_ERRORID_USER_REQUIRED } from '../common/constants';
+import FatalErrorDialog from './FatalErrorDialog';
+import SigninDialog from './SigninDialog';
+var BaseErrorDialog = React.forwardRef(function BaseErrorDialog(props, ref) {
+  var error = props.error,
+      onSigninClick = props.onSigninClick,
+      onReloadClick = props.onReloadClick;
+
+  if (!error) {
+    return null;
+  }
+
+  switch (error.id) {
+    case KPOP_ERRORID_USER_REQUIRED:
+      return React.createElement(SigninDialog, {
+        ref: ref,
+        open: true,
+        fullWidth: true,
+        maxWidth: "xs",
+        disableBackdropClick: true,
+        disableEscapeKeyDown: true,
+        onSigninClick: onSigninClick,
+        PaperProps: {
+          elevation: 0
+        }
+      });
+
+    default:
+      return React.createElement(FatalErrorDialog, {
+        open: true,
+        error: error,
+        onReloadClick: onReloadClick,
+        ref: ref
+      });
+  }
+});
+BaseErrorDialog.propTypes = undefined !== "production" ? {
+  /**
+   * The error what will be shown.
+   */
+  error: errorShape,
+
+  /**
+   * Callback fired when the reload button is clicked.
+   */
+  onSigninClick: PropTypes.func.isRequired,
+
+  /**
+   * Callback fired when the reload button is clicked.
+   */
+  onReloadClick: PropTypes.func.isRequired
+} : {};
+export default BaseErrorDialog;

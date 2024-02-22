@@ -1,0 +1,153 @@
+import _classCallCheck from "@babel/runtime/helpers/classCallCheck";
+import _createClass from "@babel/runtime/helpers/createClass";
+import _possibleConstructorReturn from "@babel/runtime/helpers/possibleConstructorReturn";
+import _getPrototypeOf from "@babel/runtime/helpers/getPrototypeOf";
+import _assertThisInitialized from "@babel/runtime/helpers/assertThisInitialized";
+import _inherits from "@babel/runtime/helpers/inherits";
+import _defineProperty from "@babel/runtime/helpers/defineProperty";
+import React from 'react';
+import PropTypes from 'prop-types';
+import { withStyles } from '@material-ui/core/styles';
+import createPalette from '@material-ui/core/styles/createPalette';
+export var styles = function styles() {
+  return {
+    root: {
+      tableLayout: 'fixed',
+      verticalAlign: 'top',
+      fontFamily: 'monospace',
+      display: 'inline-block',
+      borderCollapse: 'collapse',
+      borderSpacing: 0,
+      '& th': {
+        padding: 10,
+        textTransform: 'capitalize',
+        textAlign: 'left'
+      }
+    },
+    colorRow: {
+      '&> td': {
+        padding: 10,
+        width: 90,
+        textAlign: 'right'
+      },
+      '&> td:first-child': {
+        width: 60,
+        textAlign: 'left'
+      }
+    }
+  };
+};
+
+var ColorPreview =
+/*#__PURE__*/
+function (_React$Component) {
+  _inherits(ColorPreview, _React$Component);
+
+  function ColorPreview() {
+    var _getPrototypeOf2;
+
+    var _this;
+
+    _classCallCheck(this, ColorPreview);
+
+    for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
+      args[_key] = arguments[_key];
+    }
+
+    _this = _possibleConstructorReturn(this, (_getPrototypeOf2 = _getPrototypeOf(ColorPreview)).call.apply(_getPrototypeOf2, [this].concat(args)));
+
+    _defineProperty(_assertThisInitialized(_this), "state", {});
+
+    return _this;
+  }
+
+  _createClass(ColorPreview, [{
+    key: "render",
+    value: function render() {
+      var classes = this.props.classes;
+      var _this$state = this.state,
+          title = _this$state.title,
+          palette = _this$state.palette,
+          color = _this$state.color;
+      return React.createElement("table", {
+        className: classes.root
+      }, React.createElement("thead", null, React.createElement("tr", null, React.createElement("th", {
+        colSpan: "2"
+      }, title))), React.createElement("tbody", null, Object.keys(color).map(function (k) {
+        var c = color[k];
+        return React.createElement("tr", {
+          className: classes.colorRow,
+          style: {
+            backgroundColor: c,
+            color: palette.getContrastText(c)
+          },
+          key: k
+        }, React.createElement("td", null, k), React.createElement("td", null, c));
+      })));
+    }
+  }], [{
+    key: "getDerivedStateFromProps",
+    value: function getDerivedStateFromProps(nextProps) {
+      var title = nextProps.title;
+      var palette;
+
+      if (nextProps.palette) {
+        palette = nextProps.palette;
+      } else {
+        palette = nextProps.theme.palette;
+
+        if (!title) {
+          title = "theme ".concat(nextProps.paletteColor);
+        }
+      }
+
+      var color = palette[nextProps.paletteColor];
+
+      if (nextProps.color) {
+        if (!nextProps.palette) {
+          palette = createPalette({
+            primary: nextProps.color,
+            type: nextProps.type,
+            contrastThreshold: nextProps.contrastThreshold,
+            tonalOffset: nextProps.tonalOffset
+          });
+
+          if (!nextProps.title) {
+            title = 'color';
+          }
+        }
+
+        color = nextProps.color;
+      }
+
+      return {
+        title: title,
+        palette: palette,
+        color: color
+      };
+    }
+  }]);
+
+  return ColorPreview;
+}(React.Component);
+
+ColorPreview.defaultProps = {
+  paletteColor: 'primary',
+  type: 'light',
+  contrastThreshold: 3,
+  tonalOffset: 0.2
+};
+ColorPreview.propTypes = undefined !== "production" ? {
+  classes: PropTypes.object.isRequired,
+  theme: PropTypes.object,
+  title: PropTypes.string,
+  color: PropTypes.object,
+  palette: PropTypes.object,
+  paletteColor: PropTypes.oneOf(['primary', 'secondary', 'text', 'grey', 'error', 'common', 'background']),
+  type: PropTypes.oneOf(['light', 'dark']),
+  contrastThreshold: PropTypes.number.isRequired,
+  tonalOffset: PropTypes.number.isRequired
+} : {};
+export default withStyles(styles, {
+  withTheme: true
+})(ColorPreview);

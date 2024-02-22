@@ -1,0 +1,323 @@
+import _defineProperty from "@babel/runtime/helpers/defineProperty";
+import _regeneratorRuntime from "@babel/runtime/regenerator";
+
+function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); keys.push.apply(keys, symbols); } return keys; }
+
+function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; if (i % 2) { ownKeys(Object(source), true).forEach(function (key) { _defineProperty(target, key, source[key]); }); } else if (Object.getOwnPropertyDescriptors) { Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)); } else { ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } } return target; }
+
+import { defineMessages } from 'react-intl';
+import { resolveError } from '../errors/actions';
+import { KPOP_RESET_USER_AND_REDIRECT_TO_SIGNIN } from '../oidc/constants';
+import { KPOP_SET_ERROR, KPOP_GLUE_GLUED, KPOP_SNACKBAR_ENQUEUE, KPOP_SNACKBAR_REMOVE, KPOP_SNACKBAR_CLOSE, KPOP_ERRORID_USER_REQUIRED, KPOP_ERRORID_NETWORK_ERROR, KPOP_ERRORID_APP_INITIALIZATION_ERROR } from './constants';
+import { UnexpectedNetworkResponseError } from './errors';
+var translations = defineMessages({
+  signInButtonText: {
+    "id": "kpop.common.actions.signInButton.label",
+    "defaultMessage": "Sign in"
+  },
+  noActiveUserSessionMessage: {
+    "id": "kpop.common.errorMessage.noActiveUserSession.message",
+    "defaultMessage": "No active user session."
+  },
+  noActiveUserSessionDetail: {
+    "id": "kpop.common.errorMessage.noActiveUserSession.detail",
+    "defaultMessage": "To use this app you must be signed in, but your active session could not be validated or is expired."
+  },
+  networkRequestFailed: {
+    "id": "kpop.common.errorMessage.networkRequestFailed.message",
+    "defaultMessage": "Error: network request failed: {status}"
+  },
+  networkRequestForbidden: {
+    "id": "kpop.common.errorMessage.networkRequestForbidden.message",
+    "defaultMessage": "Error: network request forbidden: {status}"
+  },
+  appInitializationError: {
+    "id": "kpop.common.errorMessage.appInitializationError.message",
+    "defaultMessage": "App start failed with error!"
+  }
+});
+export function setError(error) {
+  return function _callee2(dispatch) {
+    return _regeneratorRuntime.async(function _callee2$(_context2) {
+      while (1) {
+        switch (_context2.prev = _context2.next) {
+          case 0:
+            if (!(error && error.resolution)) {
+              _context2.next = 9;
+              break;
+            }
+
+            if (!error.fatal) {
+              _context2.next = 5;
+              break;
+            }
+
+            error.resolver = function _callee() {
+              return _regeneratorRuntime.async(function _callee$(_context) {
+                while (1) {
+                  switch (_context.prev = _context.next) {
+                    case 0:
+                      _context.next = 2;
+                      return _regeneratorRuntime.awrap(dispatch(resolveError(error)));
+
+                    case 2:
+                    case "end":
+                      return _context.stop();
+                  }
+                }
+              });
+            };
+
+            _context2.next = 7;
+            break;
+
+          case 5:
+            _context2.next = 7;
+            return _regeneratorRuntime.awrap(dispatch(resolveError(error)));
+
+          case 7:
+            _context2.next = 10;
+            break;
+
+          case 9:
+            if (error && !error.fatal) {
+              dispatch(enqueueErrorSnackbar(error));
+            }
+
+          case 10:
+            dispatch({
+              type: KPOP_SET_ERROR,
+              error: error
+            });
+
+          case 11:
+          case "end":
+            return _context2.stop();
+        }
+      }
+    });
+  };
+}
+export function glueGlued(glue) {
+  return {
+    type: KPOP_GLUE_GLUED,
+    glue: glue
+  };
+}
+export function networkFetch(input, init) {
+  var expectedStatus = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 200;
+  var expectJSON = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : true;
+  var dispatchError = arguments.length > 4 && arguments[4] !== undefined ? arguments[4] : true;
+  return function _callee3(dispatch) {
+    return _regeneratorRuntime.async(function _callee3$(_context3) {
+      while (1) {
+        switch (_context3.prev = _context3.next) {
+          case 0:
+            return _context3.abrupt("return", fetch(input, init).then(function (response) {
+              // First check for response status.
+              if (expectedStatus && response.status !== expectedStatus) {
+                var err = new UnexpectedNetworkResponseError("unexpected status: ".concat(response.status), response.status);
+
+                if (dispatchError) {
+                  err.handled = true;
+                  dispatch(networkError(response.status, response, err));
+                }
+
+                throw err;
+              } else {
+                return response;
+              }
+            }).then(function (response) {
+              // Decode JSON is JSON is expected and received.
+              if (expectJSON && response.headers.get('Content-Type').indexOf('application/json') === 0) {
+                return response.json().then(function (json) {
+                  return {
+                    response: response,
+                    data: json
+                  };
+                });
+              } else {
+                // Return directly, if not JSON or raise error when expected.
+                if (expectJSON) {
+                  var err = new UnexpectedNetworkResponseError('unexpected Content-Type', response.status);
+
+                  if (dispatchError) {
+                    err.handled = true;
+                    dispatch(networkError(response.status, response, err));
+                  }
+
+                  throw err;
+                }
+
+                return {
+                  data: response
+                };
+              }
+            }).then(function (result) {
+              // No error - return data.
+              return result.data;
+            }, function (raisedError) {
+              // Error case, dispatch when not already handled.
+              if (dispatchError && !raisedError.handled) {
+                dispatch(networkError(0, null, raisedError));
+              }
+
+              throw raisedError;
+            }));
+
+          case 1:
+          case "end":
+            return _context3.stop();
+        }
+      }
+    });
+  };
+}
+export function networkError(status, response) {
+  var raisedError = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : null;
+  return function _callee4(dispatch) {
+    var error;
+    return _regeneratorRuntime.async(function _callee4$(_context4) {
+      while (1) {
+        switch (_context4.prev = _context4.next) {
+          case 0:
+            error = {
+              id: KPOP_ERRORID_NETWORK_ERROR,
+              status: status,
+              fatal: false,
+              resolution: null,
+              raisedError: raisedError
+            };
+
+            if (!response) {
+              _context4.next = 13;
+              break;
+            }
+
+            if (!(response.headers && response.headers.get('Content-Type').indexOf('application/json') === 0)) {
+              _context4.next = 8;
+              break;
+            }
+
+            _context4.next = 5;
+            return _regeneratorRuntime.awrap(response.json());
+
+          case 5:
+            error.json = _context4.sent;
+            _context4.next = 11;
+            break;
+
+          case 8:
+            _context4.next = 10;
+            return _regeneratorRuntime.awrap(response.text());
+
+          case 10:
+            error.detail = _context4.sent;
+
+          case 11:
+            _context4.next = 14;
+            break;
+
+          case 13:
+            if (raisedError) {
+              error.detail = '' + raisedError;
+            }
+
+          case 14:
+            _context4.t0 = status;
+            _context4.next = _context4.t0 === 403 ? 17 : 21;
+            break;
+
+          case 17:
+            // Forbidden.
+            error.message = translations.networkRequestForbidden;
+            error.fatal = true;
+            error.resolution = KPOP_RESET_USER_AND_REDIRECT_TO_SIGNIN;
+            return _context4.abrupt("break", 23);
+
+          case 21:
+            error.message = translations.networkRequestFailed;
+            return _context4.abrupt("break", 23);
+
+          case 23:
+            error.values = {
+              status: status
+            };
+            return _context4.abrupt("return", dispatch(setError(error)));
+
+          case 25:
+          case "end":
+            return _context4.stop();
+        }
+      }
+    });
+  };
+}
+export function userRequiredError() {
+  var fatal = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : true;
+  var raisedError = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : null;
+  return function (dispatch) {
+    var error = {
+      id: KPOP_ERRORID_USER_REQUIRED,
+      fatal: fatal,
+      resolution: KPOP_RESET_USER_AND_REDIRECT_TO_SIGNIN,
+      raisedError: raisedError,
+      message: translations.noActiveUserSessionMessage,
+      detail: translations.noActiveUserSessionDetail,
+      withoutFatalSuffix: true,
+      reloadButtonText: translations.signInButtonText
+    };
+    return dispatch(setError(error));
+  };
+}
+export function appInitializationError() {
+  var fatal = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : true;
+
+  var _ref = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {},
+      raisedError = _ref.raisedError,
+      detail = _ref.detail;
+
+  return function (dispatch) {
+    var error = {
+      id: KPOP_ERRORID_APP_INITIALIZATION_ERROR,
+      fatal: fatal,
+      raisedError: raisedError,
+      message: translations.appInitializationError,
+      detail: detail
+    };
+    return dispatch(setError(error));
+  };
+}
+export function enqueueErrorSnackbar(error) {
+  return function (dispatch) {
+    return dispatch(enqueueSnackbar({
+      message: error.message,
+      options: _objectSpread({}, error.options, {
+        variant: 'error'
+      }),
+      values: error.values
+    }));
+  };
+}
+export function enqueueSnackbar(notification) {
+  var key = notification.options && notification.options.key;
+  return {
+    type: KPOP_SNACKBAR_ENQUEUE,
+    notification: _objectSpread({}, notification, {
+      key: key ? key : String(new Date().getTime() + Math.random())
+    })
+  };
+}
+export function removeSnackbar(key) {
+  return {
+    type: KPOP_SNACKBAR_REMOVE,
+    key: key
+  };
+}
+export function closeSnackbar(key) {
+  return {
+    type: KPOP_SNACKBAR_CLOSE,
+    dismissAll: !key,
+    key: key
+  };
+}

@@ -1,0 +1,38 @@
+import _classCallCheck from "@babel/runtime/helpers/classCallCheck";
+import _possibleConstructorReturn from "@babel/runtime/helpers/possibleConstructorReturn";
+import _getPrototypeOf from "@babel/runtime/helpers/getPrototypeOf";
+import _assertThisInitialized from "@babel/runtime/helpers/assertThisInitialized";
+import _inherits from "@babel/runtime/helpers/inherits";
+import _wrapNativeSuper from "@babel/runtime/helpers/wrapNativeSuper";
+import _defineProperty from "@babel/runtime/helpers/defineProperty";
+export var UnexpectedNetworkResponseError =
+/*#__PURE__*/
+function (_Error) {
+  _inherits(UnexpectedNetworkResponseError, _Error);
+
+  function UnexpectedNetworkResponseError(message, status) {
+    var _getPrototypeOf2;
+
+    var _this;
+
+    _classCallCheck(this, UnexpectedNetworkResponseError);
+
+    for (var _len = arguments.length, args = new Array(_len > 2 ? _len - 2 : 0), _key = 2; _key < _len; _key++) {
+      args[_key - 2] = arguments[_key];
+    }
+
+    _this = _possibleConstructorReturn(this, (_getPrototypeOf2 = _getPrototypeOf(UnexpectedNetworkResponseError)).call.apply(_getPrototypeOf2, [this, message].concat(args)));
+
+    _defineProperty(_assertThisInitialized(_this), "handled", false);
+
+    _this.status = status;
+
+    if (Error.captureStackTrace !== undefined) {
+      Error.captureStackTrace(_assertThisInitialized(_this), UnexpectedNetworkResponseError);
+    }
+
+    return _this;
+  }
+
+  return UnexpectedNetworkResponseError;
+}(_wrapNativeSuper(Error));

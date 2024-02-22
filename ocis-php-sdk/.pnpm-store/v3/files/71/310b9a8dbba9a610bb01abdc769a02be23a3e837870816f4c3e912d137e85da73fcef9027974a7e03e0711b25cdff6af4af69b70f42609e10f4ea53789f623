@@ -1,0 +1,70 @@
+// NOTE(longsleep): Keep this file as minimal as possible. Especially avoid any
+// dependency which pulls in oidc-client so that the early bundles do include
+// the very large oidc-client with its dependencies.
+import { showErrorInLoader } from '../utils';
+import { isSilentRefreshRequest, isSigninPopupCallbackRequest, isPostSignoutPopupCallbackRequest } from './utils';
+import { setup } from './settings';
+import registerResolvers from './resolvers';
+export function initialize() {
+  var appBaseURL = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : window.location.href;
+  var handleError = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : true;
+  return setup(appBaseURL).then(function () {
+    return new Promise(function (resolve, reject) {
+      // Top level poor man's minimal URL routing. This also is async and thus enables
+      // code splitting via Webpack.
+      if (isSilentRefreshRequest()) {
+        // OIDC silent refresh code - Dynaimically imported to keep the initial
+        // javascript chunk size small. This is supported by webpack and the spec
+        // can be found at https://github.com/tc39/proposal-dynamic-import.
+        import(
+        /* webpackChunkName: "kpop-oidc-callbacks" */
+        './callbacks').then(function (m) {
+          m.signinSilentCallback()["catch"](function (err) {
+            reject(err);
+          });
+        })["catch"](function (err) {
+          reject(err);
+        });
+      } else if (isSigninPopupCallbackRequest()) {
+        // OIDC popup callback. Trigger our callback to notify opener. Dynamically
+        // imported to keep the initial javascript chunk size small. This is
+        // supported by webpack and the spec can be found at
+        // https://github.com/tc39/proposal-dynamic-import.
+        import(
+        /* webpackChunkName: "kpop-oidc-callbacks" */
+        './callbacks').then(function (m) {
+          m.signinPopupCallback()["catch"](function (err) {
+            reject(err);
+          });
+        })["catch"](function (err) {
+          reject(err);
+        });
+      } else if (isPostSignoutPopupCallbackRequest()) {
+        // OIDC popup callback. Trigger our callback to notify opener. Dynamically
+        // imported to keep the initial javascript chunk size small. This is
+        // supported by webpack and the spec can be found at
+        // https://github.com/tc39/proposal-dynamic-import.
+        import(
+        /* webpackChunkName: "kpop-oidc-callbacks" */
+        './callbacks').then(function (m) {
+          m.signoutPopupCallback()["catch"](function (err) {
+            reject(err);
+          });
+        })["catch"](function (err) {
+          reject(err);
+        });
+      } else {
+        // Normal startup, set config and resolve promise so app can continue.
+        registerResolvers();
+        resolve();
+      }
+    })["catch"](function (err) {
+      if (handleError) {
+        showErrorInLoader('Initialization error ', err);
+      }
+
+      throw err;
+    });
+  });
+}
+export default initialize;

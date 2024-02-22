@@ -1,0 +1,12 @@
+/**
+ * Constants for scopes used within an Kopano environment.
+ */
+export var scopeOpenID = 'openid';
+export var scopeProfile = 'profile';
+export var scopeEmail = 'email';
+export var scopeOfflineAccess = 'offline_access';
+export var scopeGuestOK = 'konnect/guestok';
+export var scopeGrapi = 'kopano/gc';
+export var scopeKvs = 'kopano/kvs';
+export var scopeKwm = 'kopano/kwm';
+export var scopePubs = 'kopano/pubs';

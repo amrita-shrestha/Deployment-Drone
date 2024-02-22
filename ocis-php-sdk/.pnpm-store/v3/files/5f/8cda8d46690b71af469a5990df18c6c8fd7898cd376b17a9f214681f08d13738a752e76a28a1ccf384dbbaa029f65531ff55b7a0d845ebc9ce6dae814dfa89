@@ -1,0 +1,17 @@
+import { UserManager } from 'oidc-client';
+var userManager = new UserManager();
+export function signinSilentCallback() {
+  return userManager.signinSilentCallback()["catch"](function (err) {
+    console.error('silent refresh callback failed', err); // eslint-disable-line no-console
+  });
+}
+export function signinPopupCallback() {
+  return userManager.signinPopupCallback()["catch"](function (err) {
+    console.error('signin popup callback failed', err); // eslint-disable-line no-console
+  });
+}
+export function signoutPopupCallback() {
+  return userManager.signoutPopupCallback()["catch"](function (err) {
+    console.error('signout popup callback failed', err); // eslint-disable-line no-console
+  });
+}

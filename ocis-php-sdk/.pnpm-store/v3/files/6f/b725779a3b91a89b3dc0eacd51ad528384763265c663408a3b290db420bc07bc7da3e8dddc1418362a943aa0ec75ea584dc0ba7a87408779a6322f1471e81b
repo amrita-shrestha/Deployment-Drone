@@ -1,0 +1,70 @@
+import _regeneratorRuntime from "@babel/runtime/regenerator";
+import { KPOP_A2HS_PROMPT_AVAILABLE, KPOP_A2HS_PROMPT_RESULT } from './constants'; // Stash
+
+var stash = {};
+export function a2HsPromptAvailable(deferredPrompt) {
+  if (deferredPrompt) {
+    stash.deferredPrompt = deferredPrompt;
+  } else {
+    delete stash.deferredPrompt;
+  }
+
+  return {
+    type: KPOP_A2HS_PROMPT_AVAILABLE,
+    available: !!stash.deferredPrompt
+  };
+}
+export function a2HsPromptResult(outcome) {
+  var accepted = outcome === 'accepted';
+  return {
+    type: KPOP_A2HS_PROMPT_RESULT,
+    accepted: accepted,
+    outcome: outcome
+  };
+}
+export function triggerA2HsPrompt() {
+  return function _callee2(dispatch) {
+    var deferredPrompt;
+    return _regeneratorRuntime.async(function _callee2$(_context2) {
+      while (1) {
+        switch (_context2.prev = _context2.next) {
+          case 0:
+            deferredPrompt = stash.deferredPrompt;
+
+            if (deferredPrompt) {
+              _context2.next = 3;
+              break;
+            }
+
+            return _context2.abrupt("return");
+
+          case 3:
+            deferredPrompt.prompt();
+            return _context2.abrupt("return", deferredPrompt.userChoice.then(function _callee(choiceResult) {
+              return _regeneratorRuntime.async(function _callee$(_context) {
+                while (1) {
+                  switch (_context.prev = _context.next) {
+                    case 0:
+                      delete stash.deferredPrompt;
+                      _context.next = 3;
+                      return _regeneratorRuntime.awrap(dispatch(a2HsPromptResult(choiceResult.outcome)));
+
+                    case 3:
+                      return _context.abrupt("return", choiceResult);
+
+                    case 4:
+                    case "end":
+                      return _context.stop();
+                  }
+                }
+              });
+            }));
+
+          case 5:
+          case "end":
+            return _context2.stop();
+        }
+      }
+    });
+  };
+}

@@ -1,0 +1,164 @@
+import _extends from "@babel/runtime/helpers/extends";
+import _objectWithoutProperties from "@babel/runtime/helpers/objectWithoutProperties";
+import _classCallCheck from "@babel/runtime/helpers/classCallCheck";
+import _createClass from "@babel/runtime/helpers/createClass";
+import _possibleConstructorReturn from "@babel/runtime/helpers/possibleConstructorReturn";
+import _getPrototypeOf from "@babel/runtime/helpers/getPrototypeOf";
+import _assertThisInitialized from "@babel/runtime/helpers/assertThisInitialized";
+import _inherits from "@babel/runtime/helpers/inherits";
+import _defineProperty from "@babel/runtime/helpers/defineProperty";
+import React from 'react';
+import PropTypes from 'prop-types';
+import classNames from 'classnames';
+import Avatar from '@material-ui/core/Avatar';
+import PersonIcon from '@material-ui/icons/Person';
+import { withStyles } from '@material-ui/core/styles';
+import { styled } from '../styled';
+import { userShape } from '../shapes';
+import { getInitials } from '../utils/initials';
+import { generateColorRGB } from '../utils/color';
+import { getDisplayName } from '../DisplayName/utils';
+
+var styles = function styles(theme) {
+  return {
+    root: {
+      color: theme.palette.text.primary,
+      fontSize: theme.typography.pxToRem(18)
+    }
+  };
+};
+/**
+ * Personas are used for rendering an individual's avatar.
+ * @since 0.3.0
+ */
+
+
+export var Persona =
+/*#__PURE__*/
+function (_React$Component) {
+  _inherits(Persona, _React$Component);
+
+  function Persona() {
+    var _getPrototypeOf2;
+
+    var _this;
+
+    _classCallCheck(this, Persona);
+
+    for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
+      args[_key] = arguments[_key];
+    }
+
+    _this = _possibleConstructorReturn(this, (_getPrototypeOf2 = _getPrototypeOf(Persona)).call.apply(_getPrototypeOf2, [this].concat(args)));
+
+    _defineProperty(_assertThisInitialized(_this), "state", {});
+
+    return _this;
+  }
+
+  _createClass(Persona, [{
+    key: "shouldComponentUpdate",
+    value: function shouldComponentUpdate(nextProps, nextState) {
+      var _this$state = this.state,
+          backgroundColor = _this$state.backgroundColor,
+          initials = _this$state.initials;
+
+      if (nextState.backgroundColor !== backgroundColor || nextState.initials !== initials) {
+        return true;
+      }
+
+      return false;
+    }
+  }, {
+    key: "render",
+    value: function render() {
+      var _this$props = this.props,
+          classes = _this$props.classes,
+          classNameProp = _this$props.className,
+          user = _this$props.user,
+          theme = _this$props.theme,
+          allowPhoneInitials = _this$props.allowPhoneInitials,
+          forceIcon = _this$props.forceIcon,
+          icon = _this$props.icon,
+          other = _objectWithoutProperties(_this$props, ["classes", "className", "user", "theme", "allowPhoneInitials", "forceIcon", "icon"]);
+
+      var _this$state2 = this.state,
+          backgroundColor = _this$state2.backgroundColor,
+          initials = _this$state2.initials;
+      var className = classNames(classes.root, classNameProp);
+      var ColoredAvatar = styled(Avatar)({
+        colorDefault: {
+          backgroundColor: backgroundColor
+        }
+      });
+      return React.createElement(ColoredAvatar, _extends({
+        className: className
+      }, other), initials && !forceIcon ? initials : icon);
+    }
+  }], [{
+    key: "getDerivedStateFromProps",
+    value: function getDerivedStateFromProps(nextProps, prevState) {
+      var user = nextProps.user,
+          allowPhoneInitials = nextProps.allowPhoneInitials,
+          theme = nextProps.theme;
+
+      if (prevState.user && user.displayName === prevState.user.displayName && user.givenName === prevState.user.givenName && user.surname === prevState.user.surname && user.guid === prevState.user.guid) {
+        return null;
+      }
+
+      var displayName = getDisplayName(user);
+      var guid = user.guid ? user.guid : user.mail ? user.mail : user.id;
+      return {
+        user: user,
+        displayName: displayName,
+        backgroundColor: generateColorRGB("".concat(guid, "-").concat(displayName)),
+        initials: getInitials(displayName, theme.direction === 'rtl', !!allowPhoneInitials)
+      };
+    }
+  }]);
+
+  return Persona;
+}(React.Component);
+Persona.defaultProps = {
+  icon: React.createElement(PersonIcon, null)
+};
+Persona.propTypes = undefined !== "production" ? {
+  /**
+   * Useful to extend the style applied to components.
+   */
+  classes: PropTypes.object.isRequired,
+
+  /**
+   * @ignore
+   */
+  className: PropTypes.string,
+
+  /**
+   * @ignore
+   */
+  theme: PropTypes.object,
+
+  /**
+   * The user object. Will be used to consistently select the color and label.
+   */
+  user: userShape.isRequired,
+
+  /**
+   * Wether or not to allow phone numbers as initials.
+   */
+  allowPhoneInitials: PropTypes.bool,
+
+  /**
+   * Wether or not to force icon instead of initials.
+   */
+  forceIcon: PropTypes.bool,
+
+  /**
+   * Icon for Persona when no initials or icon forced.
+   */
+  icon: PropTypes.element.isRequired
+} : {};
+export default withStyles(styles, {
+  withTheme: true,
+  name: 'KpopPersona'
+})(Persona);

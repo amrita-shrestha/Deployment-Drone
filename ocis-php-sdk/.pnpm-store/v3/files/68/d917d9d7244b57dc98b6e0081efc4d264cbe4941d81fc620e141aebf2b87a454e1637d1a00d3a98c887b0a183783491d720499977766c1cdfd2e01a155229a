@@ -1,0 +1,45 @@
+import { KPOP_A2HS_PROMPT_AVAILABLE, KPOP_A2HS_PROMPT_RESULT } from './constants';
+var defaultState = {
+  a2hs: {
+    available: false,
+    accepted: null,
+    outcome: undefined
+  }
+};
+
+function pwaReducer() {
+  var state = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : defaultState;
+  var action = arguments.length > 1 ? arguments[1] : undefined;
+
+  switch (action.type) {
+    case KPOP_A2HS_PROMPT_AVAILABLE:
+      {
+        var a2hs = Object.assign({}, state.a2hs, {
+          available: action.available,
+          accepted: null,
+          outcome: undefined
+        });
+        return Object.assign({}, state, {
+          a2hs: a2hs
+        });
+      }
+
+    case KPOP_A2HS_PROMPT_RESULT:
+      {
+        var _a2hs = Object.assign({}, state.a2hs, {
+          available: false,
+          accepted: action.accepted,
+          outcome: action.outcome
+        });
+
+        return Object.assign({}, state, {
+          a2hs: _a2hs
+        });
+      }
+
+    default:
+      return state;
+  }
+}
+
+export default pwaReducer;
