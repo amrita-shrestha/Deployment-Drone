@@ -1,0 +1,162 @@
+import _classCallCheck from "@babel/runtime/helpers/classCallCheck";
+import _createClass from "@babel/runtime/helpers/createClass";
+import _possibleConstructorReturn from "@babel/runtime/helpers/possibleConstructorReturn";
+import _getPrototypeOf from "@babel/runtime/helpers/getPrototypeOf";
+import _assertThisInitialized from "@babel/runtime/helpers/assertThisInitialized";
+import _inherits from "@babel/runtime/helpers/inherits";
+import _defineProperty from "@babel/runtime/helpers/defineProperty";
+import React from 'react';
+import PropTypes from 'prop-types';
+import { FormattedMessage } from 'react-intl';
+import { withStyles } from '@material-ui/core/styles';
+import IconButton from '@material-ui/core/IconButton';
+import AccountCircle from '@material-ui/icons/AccountCircle';
+import Popover from '@material-ui/core/Popover';
+import Card from '@material-ui/core/Card';
+import CardActions from '@material-ui/core/CardActions';
+import CardHeader from '@material-ui/core/CardHeader';
+import Typography from '@material-ui/core/Typography';
+import Button from '@material-ui/core/Button';
+import { userShape } from '../shapes';
+import DisplayName from '../DisplayName';
+import Persona from '../Persona';
+export var styles = function styles() {
+  return {
+    root: {},
+    card: {
+      maxWidth: 400,
+      minWidth: 250
+    },
+    actions: {
+      display: 'flex'
+    },
+    signout: {
+      marginLeft: 'auto'
+    }
+  };
+};
+
+var _ref =
+/*#__PURE__*/
+React.createElement(FormattedMessage, {
+  id: "kpop.userProfileButton.signOutButton.text",
+  defaultMessage: "Sign out"
+});
+
+var _ref2 =
+/*#__PURE__*/
+React.createElement(AccountCircle, null);
+
+var UserProfileButton =
+/*#__PURE__*/
+function (_React$PureComponent) {
+  _inherits(UserProfileButton, _React$PureComponent);
+
+  function UserProfileButton() {
+    var _getPrototypeOf2;
+
+    var _this;
+
+    _classCallCheck(this, UserProfileButton);
+
+    for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
+      args[_key] = arguments[_key];
+    }
+
+    _this = _possibleConstructorReturn(this, (_getPrototypeOf2 = _getPrototypeOf(UserProfileButton)).call.apply(_getPrototypeOf2, [this].concat(args)));
+
+    _defineProperty(_assertThisInitialized(_this), "state", {
+      anchorEl: null
+    });
+
+    _defineProperty(_assertThisInitialized(_this), "handleClick", function (event) {
+      _this.setState({
+        anchorEl: event.currentTarget
+      });
+    });
+
+    _defineProperty(_assertThisInitialized(_this), "handleClose", function () {
+      _this.setState({
+        anchorEl: null
+      });
+    });
+
+    return _this;
+  }
+
+  _createClass(UserProfileButton, [{
+    key: "render",
+    value: function render() {
+      var anchorEl = this.state.anchorEl;
+      var _this$props = this.props,
+          classes = _this$props.classes,
+          profile = _this$props.profile,
+          theme = _this$props.theme;
+      var menuID = 'kpop-user-profile-menu';
+      var signout = profile.signoutHandler ? React.createElement(Button, {
+        className: classes.signout,
+        size: "small",
+        color: "primary",
+        onClick: profile.signoutHandler
+      }, _ref) : null;
+      return React.createElement("div", null, React.createElement(IconButton, {
+        "aria-owns": anchorEl ? menuID : null,
+        "aria-haspopup": "true",
+        onClick: this.handleClick
+      }, _ref2), React.createElement(Popover, {
+        id: menuID,
+        anchorEl: anchorEl,
+        open: Boolean(anchorEl),
+        onClose: this.handleClose,
+        anchorOrigin: {
+          vertical: 'bottom',
+          horizontal: theme.direction === 'ltr' ? 'right' : 'left'
+        },
+        transformOrigin: {
+          vertical: 'top',
+          horizontal: theme.direction === 'ltr' ? 'right' : 'left'
+        }
+      }, React.createElement(Card, {
+        className: classes.card
+      }, React.createElement(CardHeader, {
+        avatar: React.createElement(Persona, {
+          className: classes.persona,
+          user: profile
+        }),
+        title: React.createElement(Typography, {
+          variant: "subtitle1"
+        }, React.createElement(DisplayName, {
+          user: profile
+        })),
+        subheader: profile.mail
+      }), React.createElement(CardActions, {
+        className: classes.actions,
+        disableSpacing: true
+      }, signout))));
+    }
+  }]);
+
+  return UserProfileButton;
+}(React.PureComponent);
+
+UserProfileButton.propTypes = undefined !== "production" ? {
+  /**
+   * Useful to extend the style applied to components.
+   */
+  classes: PropTypes.object.isRequired,
+
+  /**
+   * @ignore
+   */
+  theme: PropTypes.object.isRequired,
+
+  /**
+   * The user's profile defails. When used, the right part of the component
+   * includes a user profile section.
+   */
+  profile: userShape
+} : {};
+export default withStyles(styles, {
+  name: 'KpopUserProfileButton',
+  withTheme: true
+})(UserProfileButton);

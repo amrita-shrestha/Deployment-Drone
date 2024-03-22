@@ -1,0 +1,67 @@
+import _regeneratorRuntime from "@babel/runtime/regenerator";
+import _classCallCheck from "@babel/runtime/helpers/classCallCheck";
+import _createClass from "@babel/runtime/helpers/createClass";
+import _possibleConstructorReturn from "@babel/runtime/helpers/possibleConstructorReturn";
+import _getPrototypeOf from "@babel/runtime/helpers/getPrototypeOf";
+import _inherits from "@babel/runtime/helpers/inherits";
+import React from 'react';
+
+function makeAsyncComponent(importer) {
+  var AsyncComponent =
+  /*#__PURE__*/
+  function (_React$PureComponent) {
+    _inherits(AsyncComponent, _React$PureComponent);
+
+    function AsyncComponent(props) {
+      var _this;
+
+      _classCallCheck(this, AsyncComponent);
+
+      _this = _possibleConstructorReturn(this, _getPrototypeOf(AsyncComponent).call(this, props));
+      _this.state = {
+        component: null
+      };
+      return _this;
+    }
+
+    _createClass(AsyncComponent, [{
+      key: "componentDidMount",
+      value: function componentDidMount() {
+        var _ref, component;
+
+        return _regeneratorRuntime.async(function componentDidMount$(_context) {
+          while (1) {
+            switch (_context.prev = _context.next) {
+              case 0:
+                _context.next = 2;
+                return _regeneratorRuntime.awrap(importer());
+
+              case 2:
+                _ref = _context.sent;
+                component = _ref["default"];
+                this.setState({
+                  component: component
+                });
+
+              case 5:
+              case "end":
+                return _context.stop();
+            }
+          }
+        }, null, this);
+      }
+    }, {
+      key: "render",
+      value: function render() {
+        var C = this.state.component;
+        return C ? React.createElement(C, this.props) : null;
+      }
+    }]);
+
+    return AsyncComponent;
+  }(React.PureComponent);
+
+  return AsyncComponent;
+}
+
+export default makeAsyncComponent;

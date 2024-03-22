@@ -1,0 +1,214 @@
+import _classCallCheck from "@babel/runtime/helpers/classCallCheck";
+import _createClass from "@babel/runtime/helpers/createClass";
+import _possibleConstructorReturn from "@babel/runtime/helpers/possibleConstructorReturn";
+import _getPrototypeOf from "@babel/runtime/helpers/getPrototypeOf";
+import _assertThisInitialized from "@babel/runtime/helpers/assertThisInitialized";
+import _inherits from "@babel/runtime/helpers/inherits";
+import _defineProperty from "@babel/runtime/helpers/defineProperty";
+
+function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); keys.push.apply(keys, symbols); } return keys; }
+
+function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; if (i % 2) { ownKeys(Object(source), true).forEach(function (key) { _defineProperty(target, key, source[key]); }); } else if (Object.getOwnPropertyDescriptors) { Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)); } else { ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } } return target; }
+
+import React from 'react';
+import PropTypes from 'prop-types';
+import classNames from 'classnames';
+import { withStyles } from '@material-ui/core/styles';
+import Fade from '@material-ui/core/Fade';
+import CircularProgress from '@material-ui/core/CircularProgress';
+import * as Glue from '@gluejs/glue';
+
+var styles = function styles(theme) {
+  return {
+    root: {
+      flex: 1,
+      display: 'flex'
+    },
+    loader: {
+      position: 'absolute',
+      left: 0,
+      top: 0,
+      right: 0,
+      bottom: 0,
+      background: theme.palette.background.paper,
+      display: 'flex',
+      '& > *': {
+        margin: 'auto'
+      }
+    },
+    iframe: {
+      flex: 1,
+      border: 0
+    }
+  };
+};
+
+var _ref =
+/*#__PURE__*/
+React.createElement(CircularProgress, {
+  color: "secondary"
+});
+
+var GlueEmbed =
+/*#__PURE__*/
+function (_React$PureComponent) {
+  _inherits(GlueEmbed, _React$PureComponent);
+
+  function GlueEmbed() {
+    var _getPrototypeOf2;
+
+    var _this;
+
+    _classCallCheck(this, GlueEmbed);
+
+    for (var _len = arguments.length, _args = new Array(_len), _key = 0; _key < _len; _key++) {
+      _args[_key] = arguments[_key];
+    }
+
+    _this = _possibleConstructorReturn(this, (_getPrototypeOf2 = _getPrototypeOf(GlueEmbed)).call.apply(_getPrototypeOf2, [this].concat(_args)));
+
+    _defineProperty(_assertThisInitialized(_this), "container", null);
+
+    _defineProperty(_assertThisInitialized(_this), "glue", null);
+
+    _defineProperty(_assertThisInitialized(_this), "state", {
+      ready: false,
+      error: false
+    });
+
+    _defineProperty(_assertThisInitialized(_this), "setContainerRef", function (element) {
+      var _this$props = _this.props,
+          classes = _this$props.classes,
+          url = _this$props.url,
+          timeout = _this$props.timeout,
+          hidden = _this$props.hidden,
+          GlueOptions = _this$props.GlueOptions;
+
+      if (element === _this.container) {
+        return;
+      }
+
+      var options = _objectSpread({
+        timeout: timeout
+      }, GlueOptions, {
+        onBeforeInit: function onBeforeInit(glue, cont) {
+          cont = cont.then(function () {
+            _this.glue = glue;
+
+            _this.setState({
+              ready: true
+            });
+          });
+          var initOptions;
+
+          if (GlueOptions && GlueOptions.onBeforeInit) {
+            for (var _len2 = arguments.length, args = new Array(_len2 > 2 ? _len2 - 2 : 0), _key2 = 2; _key2 < _len2; _key2++) {
+              args[_key2 - 2] = arguments[_key2];
+            }
+
+            initOptions = GlueOptions.onBeforeInit.apply(GlueOptions, [glue, cont].concat(args));
+          }
+
+          return _objectSpread({
+            hidden: hidden
+          }, initOptions);
+        }
+      });
+
+      options.className = classNames(classes.iframe, options.className);
+      _this.container = element;
+      _this.glue = null;
+      Glue.embed(url, element, options).then(function (glue) {
+        if (_this.container !== element) {
+          return;
+        }
+
+        _this.glue = glue;
+
+        if (!timeout) {
+          _this.setState({
+            ready: true // Directly ready, when no timeout.
+
+          });
+        }
+      })["catch"](function (reason) {
+        if (_this.container !== element) {
+          return;
+        }
+
+        console.error("glue failed: ".concat(reason)); // eslint-disable-line no-console
+
+        _this.glue = null;
+
+        _this.setState({
+          error: timeout !== 0,
+          ready: timeout === 0
+        });
+      });
+    });
+
+    return _this;
+  }
+
+  _createClass(GlueEmbed, [{
+    key: "componentWillUnmount",
+    value: function componentWillUnmount() {
+      if (this.glue) {
+        this.glue.destroy();
+        this.glue = null;
+      }
+
+      this.container = null;
+    }
+  }, {
+    key: "render",
+    value: function render() {
+      var _this$props2 = this.props,
+          classes = _this$props2.classes,
+          classNameProp = _this$props2.className,
+          hidden = _this$props2.hidden;
+      var ready = this.state.ready;
+
+      if (this.glue) {
+        if ('hidden' in this.glue) {
+          this.glue.hidden = hidden;
+        }
+      } // TODO(longsleep): Add retry/error screen.
+
+
+      return React.createElement("div", {
+        className: classNames(classes.root, classNameProp),
+        ref: this.setContainerRef
+      }, React.createElement(Fade, {
+        "in": !ready,
+        unmountOnExit: true
+      }, React.createElement("div", {
+        className: classes.loader
+      }, _ref)));
+    }
+  }]);
+
+  return GlueEmbed;
+}(React.PureComponent);
+
+GlueEmbed.defaultProps = {
+  timeout: 30000
+};
+GlueEmbed.propTypes = undefined !== "production" ? {
+  /**
+   * Override or extend the styles applied to the component.
+   */
+  classes: PropTypes.object.isRequired,
+
+  /**
+   * @ignore
+   */
+  className: PropTypes.string,
+  url: PropTypes.string.isRequired,
+  timeout: PropTypes.number,
+  hidden: PropTypes.bool,
+  GlueOptions: PropTypes.object
+} : {};
+export default withStyles(styles, {
+  name: 'KpopGlueEmbed'
+})(GlueEmbed);

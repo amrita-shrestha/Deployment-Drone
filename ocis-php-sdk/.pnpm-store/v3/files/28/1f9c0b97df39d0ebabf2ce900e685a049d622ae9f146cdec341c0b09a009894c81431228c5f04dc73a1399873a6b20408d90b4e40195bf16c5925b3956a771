@@ -1,0 +1,66 @@
+import _regeneratorRuntime from "@babel/runtime/regenerator";
+import { isInFrame, isInStandaloneMode, isMobileSafari, isAndroid } from '../utils';
+export var AUTHORIZE_CALLBACK_MARKER = '#oidc-callback';
+export var AUTHORIZE_CALLBACK_POPUP_MARKER = '#oidc-popup-callback';
+export var ENDSESSION_CALLBACK_MARKER = '#oidc-endsession-callback';
+export var ENDSESSION_CALLBACK_POPUP_MARKER = '#oidc-endsession-popup-callback';
+export var SILENT_REFRESH_MARKER = '#oidc-silent-refresh';
+export var settings = {
+  popup: false,
+  popupWindowTarget: 'kpop-oidc-sign-in-' + Math.random().toString(36).substring(7),
+  popupWindowFeatures: 'location=no,toolbar=no,width=500,height=580'
+};
+export function setup() {
+  var appBaseURL,
+      standalone,
+      framed,
+      _args = arguments;
+  return _regeneratorRuntime.async(function setup$(_context) {
+    while (1) {
+      switch (_context.prev = _context.next) {
+        case 0:
+          appBaseURL = _args.length > 0 && _args[0] !== undefined ? _args[0] : window.location.href;
+          standalone = isInStandaloneMode();
+
+          if (standalone) {
+            // Blacklist stuff.
+            if (isMobileSafari()) {
+              // Mobile safari is broken since it reloads the PWA every time it becomes
+              // visiblen. Weed to sign in though (which is an external request via
+              // Safari), making PWA in iOS currently (iOS 12 at 20181018) useless for
+              // apps which use OAuth2 redirect based authentication.
+              // Reference: https://medium.com/@firt/pwas-are-coming-to-ios-11-3-cupertino-we-have-a-problem-2ff49fd7d6ea
+              // Reference: https://forums.developer.apple.com/thread/100407
+              standalone = false;
+              console.warn('oidc ignoring standalone mode of Mobile Safari'); // eslint-disable-line no-console
+            } else if (isAndroid()) {
+              // Android can use redirect based flows just. Fine in any case the popup
+              // flow cannot be used since it suspends the app (because a popup is
+              // opened. As currently we first open the popup with a dummy url, the
+              // popup would be stuck there since the original app is suspended and
+              // cannot trigger the popup navigation to the authorize endpoint.
+              standalone = false;
+              console.warn('oidc ignoring standalone mode on Android'); // eslint-disable-line no-console
+            }
+          }
+
+          framed = isInFrame(); // Use popups when in standalone mode.
+
+          settings.popup = framed || !!standalone; // Apply settings.
+
+          settings.appBaseURL = appBaseURL;
+          settings.redirectURL = "".concat(appBaseURL).concat(AUTHORIZE_CALLBACK_MARKER);
+          settings.popupRedirectURL = "".concat(appBaseURL).concat(AUTHORIZE_CALLBACK_POPUP_MARKER);
+          settings.postLogoutRedirectURL = "".concat(appBaseURL).concat(ENDSESSION_CALLBACK_MARKER);
+          settings.popupPostLogoutRedirectURL = "".concat(appBaseURL).concat(ENDSESSION_CALLBACK_POPUP_MARKER);
+          settings.silentRedirectURL = "".concat(appBaseURL).concat(SILENT_REFRESH_MARKER);
+          console.info('oidc setup complete', settings); // eslint-disable-line no-console
+
+        case 12:
+        case "end":
+          return _context.stop();
+      }
+    }
+  });
+}
+export default settings;

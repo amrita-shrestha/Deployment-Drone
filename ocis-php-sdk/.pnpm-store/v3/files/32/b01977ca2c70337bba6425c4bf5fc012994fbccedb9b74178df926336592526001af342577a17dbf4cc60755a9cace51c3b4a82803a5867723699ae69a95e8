@@ -1,0 +1,5 @@
+export { default as materialBluePinkRedZeroNine } from './materialBluePinkRedZeroNine';
+import { default as kopanoLight_ } from './kopanoLight';
+export var kopanoLight = kopanoLight_;
+export var defaultTheme = kopanoLight;
+export default defaultTheme;

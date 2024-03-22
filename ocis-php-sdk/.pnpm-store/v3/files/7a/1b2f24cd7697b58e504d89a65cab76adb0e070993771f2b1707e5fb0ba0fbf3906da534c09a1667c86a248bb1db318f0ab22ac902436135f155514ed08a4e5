@@ -1,0 +1,148 @@
+export declare const API_VERSION = 0;
+export interface IEmbeddOptions {
+    timeout?: number;
+    retries?: number;
+    className?: string;
+    attributes?: {
+        [key: string]: string;
+    };
+    sandboxRestrictions?: string;
+    featurePolicy?: string;
+    origin?: string;
+    mode?: string;
+    options?: {
+        [key: string]: unknown;
+    };
+    features?: {
+        [key: string]: (...args: unknown[]) => unknown;
+    };
+    events?: Array<string>;
+    onFrame?: (frame: HTMLIFrameElement) => void;
+    onBeforeInit?: (glue: Glue, cont: Promise<unknown>) => {
+        [key: string]: unknown;
+    } | undefined;
+}
+export interface IEnableOptions {
+    timeout?: number;
+    origins?: Array<string>;
+    features?: {
+        [key: string]: (...args: unknown[]) => unknown;
+    };
+    events?: Array<string>;
+    onInit?: (glue: Glue, initData: IInitData) => void;
+    onBeforeReady?: (glue: Glue, readyData: IReadyData) => void;
+}
+export interface IPayload {
+    v: number;
+    glue: boolean;
+    type: string;
+    data: unknown;
+    callbackId?: string;
+}
+export interface IInitData {
+    features?: Array<string>;
+    events?: Set<string>;
+    mode?: string;
+    options?: {
+        [key: string]: unknown;
+    };
+    error?: boolean;
+}
+export interface ICallbackData {
+    callbackId: string;
+    data: unknown;
+    error?: boolean;
+}
+export interface IReadyData {
+    ready: boolean;
+    data?: unknown;
+    error?: boolean;
+}
+export interface ICallData {
+    action: string;
+    args?: Array<unknown>;
+}
+export interface ICallbackRecord {
+    resolve: (value?: unknown) => void;
+    reject: (reason?: unknown) => void;
+}
+export interface IGlueEvent {
+    type: string;
+}
+export interface IGlueEventData {
+    event: IGlueEvent;
+    args?: Array<unknown>;
+}
+export interface IGlueEventListenerRecord {
+    listener: (...args: unknown[]) => void;
+    options?: AddEventListenerOptions;
+}
+export declare type API<T> = {
+    [P in keyof T]?: T[P];
+};
+/**
+ * Glue holds together glue applications and their API.
+ */
+export declare class Glue {
+    static version: string;
+    readonly enabled: boolean;
+    readonly api: API<{
+        [key: string]: (...args: unknown[]) => Promise<any>;
+    }>;
+    readonly events: Array<string>;
+    readonly options: {
+        [key: string]: unknown;
+    };
+    readonly mode?: string;
+    hidden: boolean;
+    dispatchEvent?: (event: IGlueEvent, ...args: unknown[]) => Promise<boolean>;
+    addEventListener?: (type: string, listener: (...args: unknown[]) => void, options?: AddEventListenerOptions) => void;
+    removeEventListener?: (type: string, listener: (...args: unknown[]) => void, options?: AddEventListenerOptions) => void;
+    destroy?: () => Promise<void>;
+    constructor({ api, events, options, mode, }: {
+        api?: API<{
+            [key: string]: (...args: unknown[]) => Promise<any>;
+        }>;
+        events?: Set<string>;
+        mode?: string;
+        options?: {
+            [key: string]: unknown;
+        };
+    });
+}
+/**
+ * Controller implements the internal Glue functionality.
+ */
+export declare class Controller {
+    private origin;
+    private callbackCounter;
+    private callbackTable;
+    private eventListenerCounter;
+    private eventListenerTable;
+    private handler?;
+    private destructor?;
+    private events?;
+    private window?;
+    private destroyed?;
+    constructor({ origin, handler, destructor, events, }: {
+        origin: string;
+        handler?: (message: IPayload) => Promise<unknown>;
+        destructor?: () => Promise<void>;
+        events?: Set<string>;
+    });
+    Glue({ features, events, options, mode, }: {
+        features?: Array<string>;
+        events?: Set<string>;
+        options?: {
+            [key: string]: unknown;
+        };
+        mode?: string;
+    }): Glue;
+    attach(glueWindow: Window): void;
+    detach(): void;
+    postMessage: (type: string, data: unknown) => Promise<any>;
+    private handleMessageEvent;
+    private callAction;
+    private replyMessage;
+    private handleMessage;
+}

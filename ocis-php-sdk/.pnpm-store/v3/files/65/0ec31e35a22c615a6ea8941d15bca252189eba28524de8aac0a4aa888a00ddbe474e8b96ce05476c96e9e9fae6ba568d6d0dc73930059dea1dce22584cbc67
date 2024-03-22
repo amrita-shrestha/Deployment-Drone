@@ -1,0 +1,7 @@
+/* sleep is a promise based timeout */
+export var sleep = function sleep(ms) {
+  return new Promise(function (resolve) {
+    return setTimeout(resolve, ms);
+  });
+};
+export default sleep;

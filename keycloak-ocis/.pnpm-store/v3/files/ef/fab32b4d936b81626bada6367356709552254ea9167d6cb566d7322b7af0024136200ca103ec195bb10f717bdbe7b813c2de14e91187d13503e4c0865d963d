@@ -1,0 +1,2 @@
+export var KOPANO_GRAPI_SCOPE = 'kopano/gc';
+export var KOPANO_GRAPI_ID_CLAIM = 'kopano/gc/id';

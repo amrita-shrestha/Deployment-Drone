@@ -1,0 +1,96 @@
+import _regeneratorRuntime from "@babel/runtime/regenerator";
+import settings from './settings';
+import { getUserManagerMetadata } from './usermanager';
+import { openPopupInAuthorityContext } from './utils';
+import { makeOIDCState } from './state';
+/**
+ * Converts OIDC profile object to match the requirements to work as userShape.
+ */
+
+export function profileAsUserShape(profile, userManager) {
+  var metadata = getUserManagerMetadata(userManager);
+
+  if (!metadata) {
+    throw new Error('oidc has no meta data');
+  }
+
+  var r = {
+    displayName: profile.name,
+    givenName: profile.given_name,
+    surname: profile.family_name,
+    mail: profile.email,
+    guid: profile.email ? profile.email : "".concat(metadata.issuer, "/").concat(profile.sub)
+  }; // NOTE(longsleep): Sign out support is optional. Check if the issuer has
+  // support and register handler if so. Otherwise the handler is undefined.
+
+  if (metadata.end_session_endpoint) {
+    r.signoutHandler = function _callee() {
+      var args, popup, checker, c, i;
+      return _regeneratorRuntime.async(function _callee$(_context) {
+        while (1) {
+          switch (_context.prev = _context.next) {
+            case 0:
+              console.info('oidc user sign-out handler called'); // eslint-disable-line no-console
+
+              args = {
+                state: makeOIDCState()
+              };
+
+              if (!settings.popup) {
+                _context.next = 8;
+                break;
+              }
+
+              // Open popup in correct context, and wait for origin to change.
+              popup = openPopupInAuthorityContext(userManager);
+
+              checker = function checker() {
+                var force = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : false;
+                var ok = false;
+
+                try {
+                  ok = popup.window.origin && false;
+                } catch (e) {
+                  // Navigation has happend if origin cannot be accessed. This means
+                  // the popup is ready to handle the sign-out request.
+                  ok = true;
+                }
+
+                if (ok || force) {
+                  return userManager.signoutPopup(args)["catch"](function (err) {
+                    console.warn('oidc user sign-out failed', err); // eslint-disable-line no-console
+                  });
+                }
+
+                return false;
+              }; // Run checker, wait for popup.
+
+
+              if (!checker()) {
+                c = 0;
+                i = setInterval(function () {
+                  c++;
+
+                  if (checker(c === 10)) {
+                    clearInterval(i);
+                  }
+                }, 50);
+              }
+
+              _context.next = 9;
+              break;
+
+            case 8:
+              return _context.abrupt("return", userManager.signoutRedirect(args));
+
+            case 9:
+            case "end":
+              return _context.stop();
+          }
+        }
+      });
+    };
+  }
+
+  return r;
+}

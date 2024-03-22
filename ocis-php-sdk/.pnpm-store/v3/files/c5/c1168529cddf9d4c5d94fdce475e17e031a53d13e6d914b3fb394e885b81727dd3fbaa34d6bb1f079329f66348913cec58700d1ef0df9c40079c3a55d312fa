@@ -1,0 +1,82 @@
+import React from 'react';
+import PropTypes from 'prop-types';
+import { FormattedMessage } from 'react-intl';
+
+function handleRetry(event) {
+  event.preventDefault();
+  window.location.reload();
+}
+
+var _ref =
+/*#__PURE__*/
+React.createElement(FormattedMessage, {
+  id: "kpop.loader.error.message",
+  defaultMessage: "Error!"
+});
+
+var _ref2 =
+/*#__PURE__*/
+React.createElement("a", {
+  href: "#",
+  onClick: handleRetry
+}, React.createElement(FormattedMessage, {
+  id: "kpop.loader.retry",
+  defaultMessage: "retry"
+}));
+
+var _ref3 =
+/*#__PURE__*/
+React.createElement(FormattedMessage, {
+  id: "kpop.loader.longtime.message",
+  defaultMessage: "Taking a long time..."
+});
+
+var _ref4 =
+/*#__PURE__*/
+React.createElement("a", {
+  href: "#",
+  onClick: handleRetry
+}, React.createElement(FormattedMessage, {
+  id: "kpop.loader.retry",
+  defaultMessage: "retry"
+}));
+
+var _ref5 =
+/*#__PURE__*/
+React.createElement(FormattedMessage, {
+  id: "kpop.loader.loading.message",
+  defaultMessage: "Loading..."
+});
+
+var Loading = React.forwardRef(function Loading(props, ref) {
+  if (props.error) {
+    console.error('Loading error', props.error); // eslint-disable-line no-console
+    // When the loader has errored.
+
+    return React.createElement("div", {
+      id: "loader",
+      ref: ref
+    }, _ref, " \u2014 ", _ref2);
+  } else if (props.timedOut) {
+    // When the loader has taken longer than the timeout.
+    return React.createElement("div", {
+      id: "loader",
+      ref: ref
+    }, _ref3, " \u2014 ", _ref4);
+  } else if (props.pastDelay) {
+    // When the loader has taken longer than the delay.
+    return React.createElement("div", {
+      id: "loader",
+      ref: ref
+    }, _ref5);
+  } else {
+    // When the loader has just started.
+    return null;
+  }
+});
+Loading.propTypes = undefined !== "production" ? {
+  error: PropTypes.bool,
+  timedOut: PropTypes.bool,
+  pastDelay: PropTypes.bool
+} : {};
+export default Loading;

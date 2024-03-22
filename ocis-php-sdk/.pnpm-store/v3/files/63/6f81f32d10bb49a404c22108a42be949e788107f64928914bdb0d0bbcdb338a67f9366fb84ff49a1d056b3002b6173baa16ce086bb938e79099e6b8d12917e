@@ -1,0 +1,831 @@
+import _defineProperty from "@babel/runtime/helpers/defineProperty";
+import _regeneratorRuntime from "@babel/runtime/regenerator";
+
+function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); keys.push.apply(keys, symbols); } return keys; }
+
+function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; if (i % 2) { ownKeys(Object(source), true).forEach(function (key) { _defineProperty(target, key, source[key]); }); } else if (Object.getOwnPropertyDescriptors) { Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)); } else { ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } } return target; }
+
+import { defineMessages } from 'react-intl';
+import { setError } from '../common/actions';
+import { KPOP_ERRORID_USER_REQUIRED } from '../common/constants';
+import { clearError } from '../errors/actions';
+import { KPOP_RECEIVE_USER, KPOP_RESET_USER_AND_REDIRECT_TO_SIGNIN, KPOP_OIDC_DEFAULT_SCOPE, KPOP_OIDC_TOKEN_EXPIRATION_NOTIFICATION_TIME } from './constants';
+import { settings } from './settings';
+import { isSigninCallbackRequest, isPostSignoutCallbackRequest, resetHash, blockAsyncProgress, openPopupInAuthorityContext } from './utils';
+import { newUserManager, getUserManager, setUserManagerMetadata, onBeforeSignin, onBeforeSignout } from './usermanager';
+import { makeOIDCState, restoreOIDCState, updateOIDCState } from './state';
+import { profileAsUserShape } from './profile';
+var translations = defineMessages({
+  insufficientScopeErrorMessage: {
+    "id": "kpop.oidc.errorMessage.insufficientScopeError.message",
+    "defaultMessage": "No access!"
+  },
+  insufficientScopeErrorDetail: {
+    "id": "kpop.oidc.errorMessage.insufficientScopeError.detail",
+    "defaultMessage": "You do not have permission to access this app. Please switch to another user or ask your administrator to grant you access."
+  },
+  switchUserButtonText: {
+    "id": "kpop.oidc.swichUserButton.label",
+    "defaultMessage": "Switch user"
+  }
+});
+export function receiveUser(user, userManager) {
+  return function _callee(dispatch) {
+    var profile;
+    return _regeneratorRuntime.async(function _callee$(_context) {
+      while (1) {
+        switch (_context.prev = _context.next) {
+          case 0:
+            profile = user ? profileAsUserShape(user.profile, userManager) : null;
+            _context.next = 3;
+            return _regeneratorRuntime.awrap(dispatch({
+              type: KPOP_RECEIVE_USER,
+              user: user,
+              profile: profile,
+              userManager: userManager
+            }));
+
+          case 3:
+            if (user) {
+              // Ensure to clear error, if the current error is a user required error.
+              dispatch(clearError({
+                id: KPOP_ERRORID_USER_REQUIRED
+              }, 'id'));
+            }
+
+          case 4:
+          case "end":
+            return _context.stop();
+        }
+      }
+    });
+  };
+}
+export function signinRedirect() {
+  var params = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+  return function _callee2(dispatch) {
+    var userManager, args;
+    return _regeneratorRuntime.async(function _callee2$(_context2) {
+      while (1) {
+        switch (_context2.prev = _context2.next) {
+          case 0:
+            _context2.next = 2;
+            return _regeneratorRuntime.awrap(dispatch(getOrCreateUserManager()));
+
+          case 2:
+            userManager = _context2.sent;
+            args = Object.assign({}, params, {
+              state: makeOIDCState()
+            });
+            _context2.next = 6;
+            return _regeneratorRuntime.awrap(userManager.signinRedirect(args));
+
+          case 6:
+          case "end":
+            return _context2.stop();
+        }
+      }
+    });
+  };
+}
+export function signinRedirectWhenNotPopup() {
+  var params = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+  return function _callee3(dispatch) {
+    return _regeneratorRuntime.async(function _callee3$(_context3) {
+      while (1) {
+        switch (_context3.prev = _context3.next) {
+          case 0:
+            if (settings.popup) {
+              _context3.next = 4;
+              break;
+            }
+
+            setTimeout(function () {
+              return dispatch(signinRedirect(params));
+            }, 0);
+            _context3.next = 4;
+            return _regeneratorRuntime.awrap(blockAsyncProgress());
+
+          case 4:
+          case "end":
+            return _context3.stop();
+        }
+      }
+    });
+  };
+}
+export function signinPopup() {
+  var params = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+  return function _callee4(dispatch) {
+    var userManager, args;
+    return _regeneratorRuntime.async(function _callee4$(_context4) {
+      while (1) {
+        switch (_context4.prev = _context4.next) {
+          case 0:
+            _context4.next = 2;
+            return _regeneratorRuntime.awrap(dispatch(getOrCreateUserManager()));
+
+          case 2:
+            userManager = _context4.sent;
+            args = Object.assign({}, params, {
+              state: makeOIDCState()
+            }); // Open popup in correct context.
+
+            openPopupInAuthorityContext(userManager);
+            return _context4.abrupt("return", userManager.signinPopup(args));
+
+          case 6:
+          case "end":
+            return _context4.stop();
+        }
+      }
+    });
+  };
+}
+export function startSignin() {
+  var params = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+  return function (dispatch) {
+    if (settings.popup) {
+      return dispatch(signinPopup(params));
+    } else {
+      setTimeout(function () {
+        return dispatch(signinRedirect(params));
+      }, 0);
+      return blockAsyncProgress(); // Block resolve since redirect is coming.
+    }
+  };
+}
+export function signoutRedirect() {
+  var params = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+  return function _callee5(dispatch) {
+    var userManager, args;
+    return _regeneratorRuntime.async(function _callee5$(_context5) {
+      while (1) {
+        switch (_context5.prev = _context5.next) {
+          case 0:
+            _context5.next = 2;
+            return _regeneratorRuntime.awrap(dispatch(getOrCreateUserManager()));
+
+          case 2:
+            userManager = _context5.sent;
+            args = Object.assign({}, params, {
+              state: makeOIDCState()
+            });
+            _context5.next = 6;
+            return _regeneratorRuntime.awrap(userManager.signoutRedirect(args));
+
+          case 6:
+          case "end":
+            return _context5.stop();
+        }
+      }
+    });
+  };
+}
+export function signoutPopup() {
+  var params = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+  return function _callee6(dispatch) {
+    var userManager, args;
+    return _regeneratorRuntime.async(function _callee6$(_context6) {
+      while (1) {
+        switch (_context6.prev = _context6.next) {
+          case 0:
+            _context6.next = 2;
+            return _regeneratorRuntime.awrap(dispatch(getOrCreateUserManager()));
+
+          case 2:
+            userManager = _context6.sent;
+            args = Object.assign({}, params, {
+              state: makeOIDCState()
+            }); // Open popup in correct context.
+
+            openPopupInAuthorityContext(userManager);
+            return _context6.abrupt("return", userManager.signoutPopup(args));
+
+          case 6:
+          case "end":
+            return _context6.stop();
+        }
+      }
+    });
+  };
+}
+export function startSignout() {
+  var params = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+  return function (dispatch) {
+    if (settings.popup) {
+      return dispatch(signoutPopup(params));
+    } else {
+      setTimeout(function () {
+        return dispatch(signoutRedirect(params));
+      }, 0);
+      return blockAsyncProgress(); // Block resolve since redirect is coming.
+    }
+  };
+}
+export function ensureRequiredScopes(user, requiredScopes) {
+  var dispatchError = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : true;
+  return function (dispatch) {
+    if (!requiredScopes) {
+      return;
+    }
+
+    var scopes = user.scope.split(' ');
+    var missing = null;
+    var _iteratorNormalCompletion = true;
+    var _didIteratorError = false;
+    var _iteratorError = undefined;
+
+    try {
+      for (var _iterator = requiredScopes[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+        var required = _step.value;
+
+        if (!scopes.includes(required)) {
+          missing = required;
+          break;
+        }
+      }
+    } catch (err) {
+      _didIteratorError = true;
+      _iteratorError = err;
+    } finally {
+      try {
+        if (!_iteratorNormalCompletion && _iterator["return"] != null) {
+          _iterator["return"]();
+        }
+      } finally {
+        if (_didIteratorError) {
+          throw _iteratorError;
+        }
+      }
+    }
+
+    if (missing) {
+      var err = new Error('missing scope ' + missing);
+
+      if (dispatchError) {
+        err.handled = true;
+        dispatch(insufficientScopeError());
+      }
+
+      throw err;
+    }
+  };
+}
+export function fetchUser() {
+  var options = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+  return function _callee10(dispatch) {
+    var removeUser, userManager;
+    return _regeneratorRuntime.async(function _callee10$(_context10) {
+      while (1) {
+        switch (_context10.prev = _context10.next) {
+          case 0:
+            removeUser = options.removeUser; // Register hooks from options.
+
+            onBeforeSignin(options.onBeforeSignin);
+            onBeforeSignout(options.onBeforeSignout);
+            _context10.next = 5;
+            return _regeneratorRuntime.awrap(dispatch(getOrCreateUserManager()));
+
+          case 5:
+            userManager = _context10.sent;
+
+            if (!removeUser) {
+              _context10.next = 9;
+              break;
+            }
+
+            _context10.next = 9;
+            return _regeneratorRuntime.awrap(userManager.removeUser());
+
+          case 9:
+            return _context10.abrupt("return", userManager.getUser().then(function _callee8(user) {
+              var args;
+              return _regeneratorRuntime.async(function _callee8$(_context8) {
+                while (1) {
+                  switch (_context8.prev = _context8.next) {
+                    case 0:
+                      if (!isSigninCallbackRequest()) {
+                        _context8.next = 4;
+                        break;
+                      }
+
+                      return _context8.abrupt("return", userManager.signinRedirectCallback().then(function (user) {
+                        // This is a redirect - restore options from state.
+                        if (user && user.state && user.state.options) {
+                          Object.assign(options, user.state.options);
+                        }
+
+                        console.info('oidc completed authentication', user); // eslint-disable-line no-console
+
+                        return user;
+                      })["catch"](function _callee7(err) {
+                        var args;
+                        return _regeneratorRuntime.async(function _callee7$(_context7) {
+                          while (1) {
+                            switch (_context7.prev = _context7.next) {
+                              case 0:
+                                if (!(err && err.message && err.message === 'No matching state found in storage')) {
+                                  _context7.next = 4;
+                                  break;
+                                }
+
+                                // Try to recover silently. This state can happen when the device
+                                // comes back after it was off/suspended.
+                                console.debug('oidc silently retrying after no matching state was found'); // eslint-disable-line no-console
+
+                                args = {
+                                  state: makeOIDCState()
+                                };
+                                return _context7.abrupt("return", userManager.signinSilent(args)["catch"](function (err) {
+                                  console.debug('oidc failed to silently recover after no matching state was found', err); // eslint-disable-line no-console, max-len
+
+                                  return null;
+                                }));
+
+                              case 4:
+                                console.error('oidc failed to complete authentication', err); // eslint-disable-line no-console
+
+                                return _context7.abrupt("return", null);
+
+                              case 6:
+                              case "end":
+                                return _context7.stop();
+                            }
+                          }
+                        });
+                      }).then(function (user) {
+                        // FIXME(longsleep): This relies on exclusive hash access. Ensure that
+                        // this reset happens before the state is restored.
+                        resetHash();
+                        return user;
+                      }));
+
+                    case 4:
+                      if (!isPostSignoutCallbackRequest()) {
+                        _context8.next = 8;
+                        break;
+                      }
+
+                      return _context8.abrupt("return", userManager.signoutRedirectCallback().then(function (resp) {
+                        console.info('oidc complete signout', resp); // eslint-disable-line no-console
+
+                        return resp;
+                      })["catch"](function (err) {
+                        console.error('oidc failed to complete signout', err); // eslint-disable-line no-console
+
+                        return null;
+                      }).then(function (resp) {
+                        // FIXME(longsleep): This relies on exclusive hash access. Ensure that
+                        // this reset happens before the state is restored.
+                        resetHash(); // This is a redirect - restore options from state together with state.
+
+                        if (resp && resp.state) {
+                          if (resp.state.options) {
+                            Object.assign(options, resp.state.options);
+                          }
+
+                          restoreOIDCState(resp.state);
+                        } // NOTE(longsleep): For now redirect ot sigin page after logout.
+
+
+                        return dispatch(signinRedirectWhenRequired(options));
+                      }));
+
+                    case 8:
+                      if (!(user && !user.expired)) {
+                        _context8.next = 10;
+                        break;
+                      }
+
+                      return _context8.abrupt("return", user);
+
+                    case 10:
+                      // Not a callback -> new request and we need auth.
+                      // Store options in state, so they can be restored after a redirect.
+                      updateOIDCState({
+                        options: options
+                      });
+                      args = {
+                        state: makeOIDCState()
+                      };
+                      _context8.prev = 12;
+                      _context8.next = 15;
+                      return _regeneratorRuntime.awrap(userManager.signinSilent(_objectSpread({}, args)));
+
+                    case 15:
+                      user = _context8.sent;
+
+                      if (!user) {
+                        _context8.next = 18;
+                        break;
+                      }
+
+                      return _context8.abrupt("return", user);
+
+                    case 18:
+                      _context8.next = 23;
+                      break;
+
+                    case 20:
+                      _context8.prev = 20;
+                      _context8.t0 = _context8["catch"](12);
+                      console.debug('oidc silent sign-in failed', _context8.t0); // eslint-disable-line no-console
+
+                    case 23:
+                      return _context8.abrupt("return", dispatch(signinRedirectWhenRequired(options)));
+
+                    case 24:
+                    case "end":
+                      return _context8.stop();
+                  }
+                }
+              }, null, null, [[12, 20]]);
+            }).then(function _callee9(user) {
+              return _regeneratorRuntime.async(function _callee9$(_context9) {
+                while (1) {
+                  switch (_context9.prev = _context9.next) {
+                    case 0:
+                      _context9.next = 2;
+                      return _regeneratorRuntime.awrap(dispatch(receiveUser(user, userManager)));
+
+                    case 2:
+                      if (user && user.state !== undefined) {
+                        restoreOIDCState(user.state);
+                      }
+
+                      return _context9.abrupt("return", user);
+
+                    case 4:
+                    case "end":
+                      return _context9.stop();
+                  }
+                }
+              });
+            }));
+
+          case 10:
+          case "end":
+            return _context10.stop();
+        }
+      }
+    });
+  };
+}
+export function removeUser() {
+  return function _callee11() {
+    var userManager;
+    return _regeneratorRuntime.async(function _callee11$(_context11) {
+      while (1) {
+        switch (_context11.prev = _context11.next) {
+          case 0:
+            userManager = getUserManager();
+
+            if (!userManager) {
+              _context11.next = 4;
+              break;
+            }
+
+            _context11.next = 4;
+            return _regeneratorRuntime.awrap(userManager.removeUser());
+
+          case 4:
+          case "end":
+            return _context11.stop();
+        }
+      }
+    });
+  };
+}
+
+function signinRedirectWhenRequired() {
+  var options = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+  var params = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
+  return function _callee12(dispatch) {
+    var noRedirect;
+    return _regeneratorRuntime.async(function _callee12$(_context12) {
+      while (1) {
+        switch (_context12.prev = _context12.next) {
+          case 0:
+            noRedirect = options.noRedirect;
+
+            if (!noRedirect) {
+              _context12.next = 3;
+              break;
+            }
+
+            return _context12.abrupt("return");
+
+          case 3:
+            _context12.next = 5;
+            return _regeneratorRuntime.awrap(dispatch(signinRedirectWhenNotPopup(params)));
+
+          case 5:
+          case "end":
+            return _context12.stop();
+        }
+      }
+    });
+  };
+}
+
+export function fetchUserSilent() {
+  return function _callee15(dispatch) {
+    var userManager;
+    return _regeneratorRuntime.async(function _callee15$(_context15) {
+      while (1) {
+        switch (_context15.prev = _context15.next) {
+          case 0:
+            _context15.next = 2;
+            return _regeneratorRuntime.awrap(dispatch(getOrCreateUserManager()));
+
+          case 2:
+            userManager = _context15.sent;
+            return _context15.abrupt("return", userManager.getUser().then(function _callee13(user) {
+              var args;
+              return _regeneratorRuntime.async(function _callee13$(_context13) {
+                while (1) {
+                  switch (_context13.prev = _context13.next) {
+                    case 0:
+                      if (!(user !== null)) {
+                        _context13.next = 2;
+                        break;
+                      }
+
+                      return _context13.abrupt("return", user);
+
+                    case 2:
+                      args = {
+                        state: makeOIDCState()
+                      };
+                      _context13.prev = 3;
+                      _context13.next = 6;
+                      return _regeneratorRuntime.awrap(userManager.signinSilent(args));
+
+                    case 6:
+                      user = _context13.sent;
+                      _context13.next = 13;
+                      break;
+
+                    case 9:
+                      _context13.prev = 9;
+                      _context13.t0 = _context13["catch"](3);
+                      console.debug('oidc silent sign-in failed', _context13.t0); // eslint-disable-line no-console
+
+                      user = null;
+
+                    case 13:
+                      return _context13.abrupt("return", user);
+
+                    case 14:
+                    case "end":
+                      return _context13.stop();
+                  }
+                }
+              }, null, null, [[3, 9]]);
+            }).then(function _callee14(user) {
+              return _regeneratorRuntime.async(function _callee14$(_context14) {
+                while (1) {
+                  switch (_context14.prev = _context14.next) {
+                    case 0:
+                      _context14.next = 2;
+                      return _regeneratorRuntime.awrap(dispatch(receiveUser(user, userManager)));
+
+                    case 2:
+                      if (user && user.state !== undefined) {
+                        restoreOIDCState(user.state);
+                      }
+
+                      return _context14.abrupt("return", user);
+
+                    case 4:
+                    case "end":
+                      return _context14.stop();
+                  }
+                }
+              });
+            }));
+
+          case 4:
+          case "end":
+            return _context15.stop();
+        }
+      }
+    });
+  };
+}
+export function getOrCreateUserManager() {
+  return function (dispatch) {
+    var userManager = getUserManager();
+
+    if (userManager) {
+      return userManager;
+    }
+
+    return dispatch(createUserManager()).then(function _callee16(userManager) {
+      var metadata;
+      return _regeneratorRuntime.async(function _callee16$(_context16) {
+        while (1) {
+          switch (_context16.prev = _context16.next) {
+            case 0:
+              // Always clear up stale state stuff, when a new manager is created.
+              setTimeout(function () {
+                userManager._clearStaleState();
+              }, 0);
+              _context16.next = 3;
+              return _regeneratorRuntime.awrap(userManager._getMetadata());
+
+            case 3:
+              metadata = _context16.sent;
+              setUserManagerMetadata(userManager, metadata);
+              return _context16.abrupt("return", userManager);
+
+            case 6:
+            case "end":
+              return _context16.stop();
+          }
+        }
+      });
+    });
+  };
+}
+export function createUserManager() {
+  return function _callee19(dispatch, getState) {
+    var config, iss, scope, userManager;
+    return _regeneratorRuntime.async(function _callee19$(_context19) {
+      while (1) {
+        switch (_context19.prev = _context19.next) {
+          case 0:
+            config = getState().common.config;
+            iss = config.oidc.iss;
+
+            if (iss === '') {
+              // Auto generate issuer with current host.
+              iss = 'https://' + window.location.host;
+            }
+
+            scope = config.oidc.scope;
+
+            if (scope === '' || scope === undefined) {
+              scope = KPOP_OIDC_DEFAULT_SCOPE;
+            }
+
+            userManager = newUserManager({
+              authority: iss,
+              client_id: config.oidc.clientID || 'kpop-' + encodeURI(settings.appBaseURL),
+              // eslint-disable-line camelcase
+              redirect_uri: settings.redirectURL,
+              // eslint-disable-line camelcase
+              popup_redirect_uri: settings.popupRedirectURL,
+              // eslint-disable-line camelcase
+              post_logout_redirect_uri: settings.postLogoutRedirectURL,
+              // eslint-disable-line camelcase
+              popup_post_logout_redirect_uri: settings.popupPostLogoutRedirectURL,
+              // eslint-disable-line camelcase
+              silent_redirect_uri: settings.silentRedirectURL,
+              // eslint-disable-line camelcase
+              response_type: config.oidc.useImplicitFlow ? 'id_token token' : 'code',
+              // eslint-disable-line camelcase
+              scope: scope,
+              loadUserInfo: true,
+              accessTokenExpiringNotificationTime: KPOP_OIDC_TOKEN_EXPIRATION_NOTIFICATION_TIME,
+              automaticSilentRenew: true,
+              includeIdTokenInSilentRenew: true,
+              popupWindowFeatures: settings.popupWindowFeatures,
+              popupWindowTarget: settings.popupWindowTarget,
+              extraQueryParams: config.oidc.eqp || undefined,
+              metadataUrl: config.oidc.metadataURL || undefined
+            });
+            userManager.events.addAccessTokenExpiring(function () {
+              console.debug('oidc token expiring'); // eslint-disable-line no-console
+            });
+            userManager.events.addAccessTokenExpired(function () {
+              console.warn('oidc access token expired'); // eslint-disable-line no-console
+
+              userManager.removeUser();
+              setTimeout(function () {
+                // Try to fetch new user silently. This for example helps when the device
+                // comes back after it was suspended or lost connection which led it to
+                // miss the opportunity to renew tokens in time.
+                dispatch(fetchUserSilent());
+              }, 0);
+            });
+            userManager.events.addUserLoaded(function _callee17(user) {
+              var oldUser;
+              return _regeneratorRuntime.async(function _callee17$(_context17) {
+                while (1) {
+                  switch (_context17.prev = _context17.next) {
+                    case 0:
+                      console.debug('oidc user loaded', user); // eslint-disable-line no-console
+
+                      oldUser = getState().common.user;
+
+                      if (!(oldUser && oldUser.profile.sub !== user.profile.sub)) {
+                        _context17.next = 7;
+                        break;
+                      }
+
+                      // Huh we received another user, this should not happen so lets clear
+                      // our local stuff and pretend nothing happened.
+                      console.warn('oidc remove user as the user has changed'); // eslint-disable-line no-console
+
+                      _context17.next = 6;
+                      return _regeneratorRuntime.awrap(userManager.removeUser());
+
+                    case 6:
+                      return _context17.abrupt("return");
+
+                    case 7:
+                      _context17.next = 9;
+                      return _regeneratorRuntime.awrap(dispatch(receiveUser(user, userManager)));
+
+                    case 9:
+                    case "end":
+                      return _context17.stop();
+                  }
+                }
+              });
+            });
+            userManager.events.addUserUnloaded(function _callee18() {
+              return _regeneratorRuntime.async(function _callee18$(_context18) {
+                while (1) {
+                  switch (_context18.prev = _context18.next) {
+                    case 0:
+                      console.debug('oidc user unloaded'); // eslint-disable-line no-console
+
+                      _context18.next = 3;
+                      return _regeneratorRuntime.awrap(dispatch(receiveUser(null, userManager)));
+
+                    case 3:
+                    case "end":
+                      return _context18.stop();
+                  }
+                }
+              });
+            });
+            userManager.events.addSilentRenewError(function (err) {
+              console.warn('oidc user silent renew error', err.error); // eslint-disable-line no-console
+
+              if (err) {
+                // Handle the hopeless.
+                switch (err.error) {
+                  case 'interaction_required':
+                  case 'login_required':
+                    userManager.removeUser();
+                    setTimeout(function () {
+                      // Try to fetch new user. This will redirect to login if unsuccessful.
+                      dispatch(fetchUser());
+                    }, 0);
+                    return;
+
+                  default:
+                }
+              }
+
+              setTimeout(function () {
+                console.debug('oidc retrying silent renew'); // eslint-disable-line no-console
+
+                userManager.getUser().then(function (user) {
+                  console.debug('oidc retrying silent renew of user', user); // eslint-disable-line no-console
+
+                  if (user && !user.expired) {
+                    userManager.startSilentRenew();
+                  } else {
+                    console.warn('oidc remove user as silent renew has failed to renew in time'); // eslint-disable-line no-console, max-len
+
+                    userManager.removeUser();
+                  }
+                });
+              }, 5000);
+            });
+            userManager.events.addUserSignedOut(function () {
+              console.debug('oidc user signed out at OP'); // eslint-disable-line no-console
+
+              userManager.removeUser();
+            });
+            return _context19.abrupt("return", userManager);
+
+          case 13:
+          case "end":
+            return _context19.stop();
+        }
+      }
+    });
+  };
+}
+export function insufficientScopeError() {
+  var fatal = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : true;
+  var raisedError = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : null;
+  return function (dispatch) {
+    var error = {
+      fatal: fatal,
+      resolution: KPOP_RESET_USER_AND_REDIRECT_TO_SIGNIN,
+      raisedError: raisedError,
+      message: translations.insufficientScopeErrorMessage,
+      detail: translations.insufficientScopeErrorDetail,
+      withoutFatalSuffix: true,
+      reloadButtonText: translations.switchUserButtonText
+    };
+    return dispatch(setError(error));
+  };
+}

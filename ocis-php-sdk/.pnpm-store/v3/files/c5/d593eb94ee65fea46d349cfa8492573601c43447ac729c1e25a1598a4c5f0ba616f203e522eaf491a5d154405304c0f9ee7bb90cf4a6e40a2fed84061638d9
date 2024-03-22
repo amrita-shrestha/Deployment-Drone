@@ -1,0 +1,3 @@
+export declare function getGlueParameter(name: string): string | null;
+export declare function setGlueParameter(url: URL, name: string, value: string): void;
+export declare const queueMicroTask: Function;

@@ -1,0 +1,122 @@
+import _extends from "@babel/runtime/helpers/extends";
+import _objectWithoutProperties from "@babel/runtime/helpers/objectWithoutProperties";
+import _classCallCheck from "@babel/runtime/helpers/classCallCheck";
+import _createClass from "@babel/runtime/helpers/createClass";
+import _possibleConstructorReturn from "@babel/runtime/helpers/possibleConstructorReturn";
+import _getPrototypeOf from "@babel/runtime/helpers/getPrototypeOf";
+import _inherits from "@babel/runtime/helpers/inherits";
+
+/*
+This file is baded on https://github.com/JacquesBonet/jss-material-ui
+
+Copyright (c) 2018 Kopano b.v.
+Copyright (c) 2016-2018 Team Wertarbyte and contributors
+
+MIT License
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+*/
+
+/* eslint-disable */
+import React from 'react';
+import classNames from 'classnames';
+import PropTypes from 'prop-types';
+import { withStyles } from '@material-ui/core/styles';
+
+var styles = function styles(theme, props, style) {
+  return typeof style === 'function' ? style(theme, props) : style;
+};
+
+var StyledComponent =
+/*#__PURE__*/
+function (_React$Component) {
+  _inherits(StyledComponent, _React$Component);
+
+  function StyledComponent() {
+    _classCallCheck(this, StyledComponent);
+
+    return _possibleConstructorReturn(this, _getPrototypeOf(StyledComponent).apply(this, arguments));
+  }
+
+  _createClass(StyledComponent, [{
+    key: "render",
+    value: function render() {
+      var _this$props = this.props,
+          classes = _this$props.classes,
+          _this$props$className = _this$props.className,
+          className = _this$props$className === void 0 ? '' : _this$props$className,
+          WrappedComponent = _this$props.WrappedComponent,
+          passThroughProps = _objectWithoutProperties(_this$props, ["classes", "className", "WrappedComponent"]);
+
+      return React.createElement(WrappedComponent, _extends({
+        className: classNames(classes[Object.keys(classes)[0]], className)
+      }, passThroughProps));
+    }
+  }]);
+
+  return StyledComponent;
+}(React.Component);
+
+StyledComponent.propTypes = undefined !== "production" ? {
+  classes: PropTypes.object.isRequired,
+  className: PropTypes.string
+} : {};
+
+var styled = function styled(WrappedComponent) {
+  var customProps = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
+  return function (style) {
+    var options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
+
+    var HOCProps = function HOCProps(WrappedComponent) {
+      return (
+        /*#__PURE__*/
+        function (_React$Component2) {
+          _inherits(_HOCProps, _React$Component2);
+
+          function _HOCProps(props) {
+            var _this;
+
+            _classCallCheck(this, _HOCProps);
+
+            _this = _possibleConstructorReturn(this, _getPrototypeOf(_HOCProps).call(this, props));
+            _this.FinalComponent = withStyles(function (theme) {
+              return styles(theme, props, style);
+            }, options)(StyledComponent);
+            return _this;
+          }
+
+          _createClass(_HOCProps, [{
+            key: "render",
+            value: function render() {
+              return React.createElement(this.FinalComponent, _extends({}, customProps, this.props, {
+                WrappedComponent: WrappedComponent
+              }));
+            }
+          }]);
+
+          return _HOCProps;
+        }(React.Component)
+      );
+    };
+
+    return HOCProps(WrappedComponent);
+  };
+};
+
+export default styled;

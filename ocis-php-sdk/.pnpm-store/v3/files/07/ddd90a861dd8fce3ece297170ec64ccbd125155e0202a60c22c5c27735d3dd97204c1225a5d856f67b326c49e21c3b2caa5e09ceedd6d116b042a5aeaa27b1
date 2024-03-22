@@ -1,0 +1,148 @@
+import _toConsumableArray from "@babel/runtime/helpers/toConsumableArray";
+import _classCallCheck from "@babel/runtime/helpers/classCallCheck";
+import _createClass from "@babel/runtime/helpers/createClass";
+import _possibleConstructorReturn from "@babel/runtime/helpers/possibleConstructorReturn";
+import _getPrototypeOf from "@babel/runtime/helpers/getPrototypeOf";
+import _assertThisInitialized from "@babel/runtime/helpers/assertThisInitialized";
+import _inherits from "@babel/runtime/helpers/inherits";
+import _defineProperty from "@babel/runtime/helpers/defineProperty";
+
+function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); keys.push.apply(keys, symbols); } return keys; }
+
+function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; if (i % 2) { ownKeys(Object(source), true).forEach(function (key) { _defineProperty(target, key, source[key]); }); } else if (Object.getOwnPropertyDescriptors) { Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)); } else { ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } } return target; }
+
+import React from 'react';
+import PropTypes from 'prop-types';
+import { injectIntl, intlShape } from 'react-intl';
+import { withSnackbar } from './SnackbarContext';
+import { removeSnackbar } from '../common/actions';
+
+var Notifier =
+/*#__PURE__*/
+function (_React$PureComponent) {
+  _inherits(Notifier, _React$PureComponent);
+
+  function Notifier() {
+    var _getPrototypeOf2;
+
+    var _this;
+
+    _classCallCheck(this, Notifier);
+
+    for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
+      args[_key] = arguments[_key];
+    }
+
+    _this = _possibleConstructorReturn(this, (_getPrototypeOf2 = _getPrototypeOf(Notifier)).call.apply(_getPrototypeOf2, [this].concat(args)));
+
+    _defineProperty(_assertThisInitialized(_this), "displayed", []);
+
+    _defineProperty(_assertThisInitialized(_this), "storeDisplayed", function (key) {
+      _this.displayed = [].concat(_toConsumableArray(_this.displayed), [key]);
+    });
+
+    _defineProperty(_assertThisInitialized(_this), "removeDisplayed", function (key) {
+      _this.displayed = _this.displayed.filter(function (k) {
+        return key !== k;
+      });
+    });
+
+    return _this;
+  }
+
+  _createClass(Notifier, [{
+    key: "componentDidUpdate",
+    value: function componentDidUpdate() {
+      var _this2 = this;
+
+      var _this$props = this.props,
+          dispatch = _this$props.dispatch,
+          intl = _this$props.intl,
+          enqueueSnackbar = _this$props.enqueueSnackbar,
+          closeSnackbar = _this$props.closeSnackbar,
+          _this$props$notificat = _this$props.notifications,
+          notifications = _this$props$notificat === void 0 ? [] : _this$props$notificat;
+      notifications.forEach(function (_ref) {
+        var key = _ref.key,
+            message = _ref.message,
+            values = _ref.values,
+            _ref$options = _ref.options,
+            options = _ref$options === void 0 ? {} : _ref$options,
+            _ref$dismissed = _ref.dismissed,
+            dismissed = _ref$dismissed === void 0 ? false : _ref$dismissed;
+
+        // Fastpass to dismiss.
+        if (dismissed) {
+          closeSnackbar(key);
+          return;
+        } // Avoid to display again.
+
+
+        if (_this2.displayed.includes(key)) {
+          return;
+        } // Translation support.
+
+
+        if (typeof message !== 'string') {
+          message = intl.formatMessage(message, values);
+        } // Display.
+
+
+        enqueueSnackbar(message, _objectSpread({
+          key: key
+        }, options, {
+          onClose: function onClose(event, reason, key) {
+            if (options.onClose) {
+              options.onClose(event, reason, key);
+            }
+          },
+          onExited: function onExited(event, key) {
+            dispatch(removeSnackbar(key));
+
+            _this2.removeDisplayed(key);
+          }
+        })); // Keep track.
+
+        _this2.storeDisplayed(key);
+      });
+    }
+  }, {
+    key: "render",
+    value: function render() {
+      return null;
+    }
+  }]);
+
+  return Notifier;
+}(React.PureComponent);
+
+Notifier.defaultProps = {
+  notifications: []
+};
+Notifier.propTypes = undefined !== "production" ? {
+  /**
+   * Internationalization api.
+   */
+  intl: intlShape.isRequired,
+
+  /**
+   * Helper function to enqueue notification to snackbar.
+   */
+  enqueueSnackbar: PropTypes.func.isRequired,
+
+  /**
+   * Helper function to dismiss notification from snackbar.
+   */
+  closeSnackbar: PropTypes.func.isRequired,
+
+  /**
+   * A dispatch function, for example from redux.
+   */
+  dispatch: PropTypes.func.isRequired,
+
+  /**
+   * Notifications array.
+   */
+  notifications: PropTypes.array.isRequired
+} : {};
+export default withSnackbar(injectIntl(Notifier));

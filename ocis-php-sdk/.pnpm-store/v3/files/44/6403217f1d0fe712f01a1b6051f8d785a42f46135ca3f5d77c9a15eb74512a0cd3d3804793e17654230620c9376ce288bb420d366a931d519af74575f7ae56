@@ -1,0 +1,43 @@
+/*
+ * debounce offers promise based debouncer function with cancel support.
+ */
+export function debounce(callable) {
+  var delay = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 250;
+  var t = null;
+  var resolvers = [];
+  var cancelled = false;
+
+  var cancel = function cancel() {
+    cancelled = true;
+    clearTimeout(t);
+  };
+
+  return function () {
+    for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
+      args[_key] = arguments[_key];
+    }
+
+    if (t) {
+      clearTimeout(t);
+    }
+
+    t = setTimeout(function () {
+      if (cancelled) {
+        return;
+      }
+
+      var r = callable.apply(void 0, args);
+      resolvers.forEach(function (resolver) {
+        return resolver(r);
+      });
+      resolvers = [];
+    }, delay); // Create new promise with cancel support.
+
+    var p = new Promise(function (resolver) {
+      return resolvers.push(resolver);
+    });
+    p.cancel = cancel;
+    return p;
+  };
+}
+export default debounce;

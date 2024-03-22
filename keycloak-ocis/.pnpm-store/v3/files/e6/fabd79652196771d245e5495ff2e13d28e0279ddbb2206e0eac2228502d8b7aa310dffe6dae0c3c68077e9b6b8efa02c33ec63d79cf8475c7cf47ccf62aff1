@@ -1,0 +1,324 @@
+import _classCallCheck from "@babel/runtime/helpers/classCallCheck";
+import _createClass from "@babel/runtime/helpers/createClass";
+import _possibleConstructorReturn from "@babel/runtime/helpers/possibleConstructorReturn";
+import _getPrototypeOf from "@babel/runtime/helpers/getPrototypeOf";
+import _assertThisInitialized from "@babel/runtime/helpers/assertThisInitialized";
+import _inherits from "@babel/runtime/helpers/inherits";
+import _defineProperty from "@babel/runtime/helpers/defineProperty";
+import React from 'react';
+import PropTypes from 'prop-types';
+import classNames from 'classnames';
+import { withStyles } from '@material-ui/core/styles';
+import capitalize from '@material-ui/core/utils/capitalize';
+import ButtonBase from '@material-ui/core/ButtonBase';
+import Typography from '@material-ui/core/Typography';
+import { fade } from '@material-ui/core/styles/colorManipulator';
+import ExtensionIcon from '@material-ui/icons/Extension';
+import { withBase } from '../BaseContainer/BaseContext';
+import KopanoCalendarIcon from '../icons/KopanoCalendarIcon';
+import KopanoContactsIcon from '../icons/KopanoContactsIcon';
+import KopanoKonnectIcon from '../icons/KopanoKonnectIcon';
+import KopanoMailIcon from '../icons/KopanoMailIcon';
+import KopanoMeetIcon from '../icons/KopanoMeetIcon';
+import KopanoWebappIcon from '../icons/KopanoWebappIcon';
+
+var styles = function styles(theme) {
+  return {
+    root: {
+      display: 'grid',
+      gridTemplateColumns: '84px 84px 84px',
+      gridGap: '2px',
+      margin: 0,
+      padding: 0
+    },
+    app: {
+      display: 'flex',
+      justifyContent: 'center',
+      alignItems: 'center'
+    },
+    button: {
+      width: 84,
+      height: 84,
+      padding: 2,
+      display: 'inline-block',
+      textAlign: 'center',
+      boxSizing: 'border-box',
+      '&:hover': {
+        textDecoration: 'none',
+        backgroundColor: fade(theme.palette.action.active, theme.palette.action.hoverOpacity),
+        // Reset on touch devices, it doesn't add specificity
+        '@media (hover: none)': {
+          backgroundColor: 'transparent'
+        }
+      },
+      fontSize: theme.typography.pxToRem(54)
+    },
+    icon: {
+      display: 'block',
+      margin: '0 auto'
+    },
+    label: {
+      display: 'block',
+      padding: 2
+    },
+
+    /* Styles applied to the button element if `size="small"`. */
+    sizeSmall: {
+      width: 32,
+      height: 32,
+      border: 'none',
+      fontSize: theme.typography.pxToRem(24),
+      display: 'flex',
+      '& $icon': {
+        maxHeight: 24,
+        maxWidth: 24
+      }
+    }
+  };
+};
+
+export var kopanoApps = [{
+  name: 'kopano-mail',
+  icon: KopanoMailIcon,
+  title: 'Mail',
+  href: '/mail/'
+}, {
+  name: 'kopano-calendar',
+  icon: KopanoCalendarIcon,
+  title: 'Calendar',
+  href: '/calendar/'
+}, {
+  name: 'kopano-contacts',
+  icon: KopanoContactsIcon,
+  title: 'Contacts',
+  href: '/contacts/'
+}, {
+  name: 'kopano-meet',
+  icon: KopanoMeetIcon,
+  title: 'Meet',
+  href: '/meet/'
+}, {
+  name: 'kopano-webapp',
+  icon: KopanoWebappIcon,
+  title: 'Webapp',
+  href: '/webapp/'
+}, {
+  name: 'kopano-konnect',
+  icon: KopanoKonnectIcon,
+  title: 'Account',
+  href: '/signin/v1/welcome'
+}];
+export var kopanoAppsTable = kopanoApps.reduce(function (t, v) {
+  t[v.name] = v;
+  return t;
+}, {});
+
+var AppsGrid =
+/*#__PURE__*/
+function (_React$PureComponent) {
+  _inherits(AppsGrid, _React$PureComponent);
+
+  function AppsGrid() {
+    var _getPrototypeOf2;
+
+    var _this;
+
+    _classCallCheck(this, AppsGrid);
+
+    for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
+      args[_key] = arguments[_key];
+    }
+
+    _this = _possibleConstructorReturn(this, (_getPrototypeOf2 = _getPrototypeOf(AppsGrid)).call.apply(_getPrototypeOf2, [this].concat(args)));
+
+    _defineProperty(_assertThisInitialized(_this), "handleClick", function (app, href) {
+      return function (event) {
+        var onAppClick = _this.props.onAppClick;
+
+        if (onAppClick) {
+          onAppClick(event, app, href);
+        }
+      };
+    });
+
+    return _this;
+  }
+
+  _createClass(AppsGrid, [{
+    key: "getIcon",
+    value: function getIcon(app) {
+      var classes = this.props.classes;
+      var Component;
+      var props = {
+        className: classes.icon,
+        fontSize: 'inherit'
+      };
+
+      if (app.icon) {
+        Component = app.icon;
+      } else if (app.iconURL) {
+        Component = 'img';
+        props.src = app.iconURL;
+        props.alt = '';
+      } else {
+        // Check if its a kopano app.
+        var kopanoApp = kopanoAppsTable[app.name];
+
+        if (kopanoApp) {
+          Component = kopanoApp.icon;
+        }
+      }
+
+      if (!Component) {
+        Component = ExtensionIcon;
+      }
+
+      return React.createElement(Component, props);
+    }
+  }, {
+    key: "getHref",
+    value: function getHref(app) {
+      var baseHref = this.props.baseHref;
+
+      if (app.href) {
+        if (app.href.indexOf('http') === 0) {
+          return app.href;
+        }
+
+        return "".concat(baseHref).concat(app.href);
+      } else {
+        // Check if its a kopano app.
+        var kopanoApp = kopanoAppsTable[app.name];
+
+        if (kopanoApp) {
+          return "".concat(baseHref).concat(kopanoApp.href);
+        }
+      }
+
+      return '';
+    }
+  }, {
+    key: "render",
+    value: function render() {
+      var _this$props = this.props,
+          classes = _this$props.classes,
+          classNameProp = _this$props.className,
+          apps = _this$props.apps,
+          enabledApps = _this$props.enabledApps,
+          target = _this$props.target,
+          size = _this$props.size,
+          config = _this$props.config;
+      var enabled = enabledApps === undefined ? config && config.apps && config.apps.enabled ? config.apps.enabled : [] : enabledApps;
+      var icons = [];
+      var _iteratorNormalCompletion = true;
+      var _didIteratorError = false;
+      var _iteratorError = undefined;
+
+      try {
+        for (var _iterator = apps[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+          var app = _step.value;
+
+          if (enabled.length > 0 && !enabled.includes(app.name)) {
+            continue;
+          }
+
+          var href = this.getHref(app);
+          var icon = this.getIcon(app);
+          icons.push(React.createElement("li", {
+            className: classes.app,
+            key: app.name
+          }, React.createElement(ButtonBase, {
+            className: classNames(classes.button, _defineProperty({}, classes["size".concat(capitalize(size))], size !== 'medium')),
+            target: target,
+            href: href,
+            onClick: this.handleClick(app, href),
+            "aria-label": app.title,
+            component: "a"
+          }, icon, size !== 'small' && React.createElement(Typography, {
+            className: classes.label
+          }, app.title))));
+        }
+      } catch (err) {
+        _didIteratorError = true;
+        _iteratorError = err;
+      } finally {
+        try {
+          if (!_iteratorNormalCompletion && _iterator["return"] != null) {
+            _iterator["return"]();
+          }
+        } finally {
+          if (_didIteratorError) {
+            throw _iteratorError;
+          }
+        }
+      }
+
+      return React.createElement("ul", {
+        className: classNames(classes.root, classNameProp)
+      }, icons);
+    }
+  }]);
+
+  return AppsGrid;
+}(React.PureComponent);
+
+AppsGrid.defaultProps = {
+  apps: kopanoApps,
+  target: '_blank',
+  baseHref: '',
+  size: 'medium'
+};
+AppsGrid.propTypes = undefined !== "production" ? {
+  /**
+   * Useful to extend the style applied to components.
+   */
+  classes: PropTypes.object.isRequired,
+
+  /**
+   * @ignore
+   */
+  className: PropTypes.string,
+
+  /**
+   * By default Kopano apps are used. This property allows override of the
+   * apps to show.
+   */
+  apps: PropTypes.arrayOf(PropTypes.object).isRequired,
+
+  /**
+   * A list of app names to show. Essentially this filters on the name field
+   * of each value of the apps property showing only apps which are listed
+   * in this array.
+   */
+  enabledApps: PropTypes.arrayOf(PropTypes.string),
+
+  /**
+   * The target attribute of the generated <a> elements.
+   */
+  target: PropTypes.string.isRequired,
+
+  /**
+   * The base href to be prepended to the invidual href values for each app.
+   */
+  baseHref: PropTypes.string.isRequired,
+
+  /**
+   * Callback fired when the an app is clicked.
+   */
+  onAppClick: PropTypes.func,
+
+  /**
+   * The size of the button.
+   * `small` is equivalent to the dense button styling.
+   */
+  size: PropTypes.oneOf(['small', 'medium']),
+
+  /**
+   * The app configuration object. This value is made available by the
+   * integrated BaseContext.
+   */
+  config: PropTypes.object
+} : {};
+export default withBase(withStyles(styles, {
+  name: 'KpopAppsGrid'
+})(AppsGrid));

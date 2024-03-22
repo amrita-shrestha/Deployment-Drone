@@ -1,0 +1,15 @@
+// Default locale to English Great Britain, so that weeks start on
+// Monday as that is what most Kopano customers would expect.
+export var defaultLocale = 'en-GB'; // Well Kopano is a Dutch company.
+
+export var defaultTimezone = 'Europe/Amsterdam'; // Redux actions.
+
+export var KPOP_SET_ERROR = 'KPOP_SET_ERROR';
+export var KPOP_GLUE_GLUED = 'KPOP_GLUE_GLUED';
+export var KPOP_SNACKBAR_ENQUEUE = 'KPOP_SNACKBAR_ENQUEUE';
+export var KPOP_SNACKBAR_REMOVE = 'KPOP_SNACKBAR_REMOVE';
+export var KPOP_SNACKBAR_CLOSE = 'KPOP_SNACKBAR_CLOSE'; // Error ids.
+
+export var KPOP_ERRORID_USER_REQUIRED = 'kpop_user_required_error';
+export var KPOP_ERRORID_NETWORK_ERROR = 'kpop_network_error';
+export var KPOP_ERRORID_APP_INITIALIZATION_ERROR = 'kpop_app_initialization_error';

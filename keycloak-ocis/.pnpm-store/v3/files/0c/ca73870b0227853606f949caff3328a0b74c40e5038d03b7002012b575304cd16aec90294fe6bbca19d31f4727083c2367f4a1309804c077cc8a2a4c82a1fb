@@ -1,0 +1,68 @@
+import React from 'react';
+import PropTypes from 'prop-types';
+import { FormattedMessage } from 'react-intl';
+import Button from '@material-ui/core/Button';
+import Snackbar from '@material-ui/core/Snackbar';
+
+var _ref =
+/*#__PURE__*/
+React.createElement(FormattedMessage, {
+  id: "kpop.updateAvailableSnack.reloadButton.text",
+  defaultMessage: "Reload"
+});
+
+var _ref2 =
+/*#__PURE__*/
+React.createElement("span", {
+  id: "kpop-update-available-snack-message-id"
+}, React.createElement(FormattedMessage, {
+  id: "kpop.updateAvailableSnack.message",
+  defaultMessage: "Update available"
+}));
+
+var UpdateAvailableSnack = React.forwardRef(function UpdateAvailableSnack(props, ref) {
+  var anchorOrigin = props.anchorOrigin,
+      onReloadClick = props.onReloadClick,
+      open = props.open;
+  return React.createElement(Snackbar, {
+    anchorOrigin: anchorOrigin,
+    open: open,
+    ref: ref,
+    action: React.createElement(Button, {
+      color: "primary",
+      size: "small",
+      onClick: onReloadClick
+    }, _ref),
+    ContentProps: {
+      'aria-describedby': 'kpop-update-available-snack-message-id'
+    },
+    message: _ref2
+  });
+});
+UpdateAvailableSnack.defaultProps = {
+  open: true,
+  anchorOrigin: {
+    vertical: 'bottom',
+    horizontal: 'left'
+  }
+};
+UpdateAvailableSnack.propTypes = undefined !== "production" ? {
+  /**
+   * The anchor of the `Snackbar`.
+   */
+  anchorOrigin: PropTypes.shape({
+    horizontal: PropTypes.oneOfType([PropTypes.number, PropTypes.oneOf(['left', 'center', 'right'])]),
+    vertical: PropTypes.oneOfType([PropTypes.number, PropTypes.oneOf(['top', 'center', 'bottom'])])
+  }),
+
+  /**
+   * Callback fired when the reload button is clicked.
+   */
+  onReloadClick: PropTypes.func.isRequired,
+
+  /**
+   * If true, `Snackbar` is open.
+   */
+  open: PropTypes.bool
+} : {};
+export default UpdateAvailableSnack;

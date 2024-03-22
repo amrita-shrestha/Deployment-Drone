@@ -1,0 +1,38 @@
+import _extends from "@babel/runtime/helpers/extends";
+import _objectWithoutProperties from "@babel/runtime/helpers/objectWithoutProperties";
+import React from 'react';
+import PropTypes from 'prop-types';
+import { Route } from 'react-router-dom';
+import BaseContext from '../BaseContainer/BaseContext';
+
+var AuthenticatedRoute = function AuthenticatedRoute(_ref) {
+  var C = _ref.component,
+      authenticated = _ref.authenticated,
+      childProps = _ref.props,
+      A = _ref.alternative,
+      rest = _objectWithoutProperties(_ref, ["component", "authenticated", "props", "alternative"]);
+
+  var base = React.useContext(BaseContext);
+  return React.createElement(Route, _extends({}, rest, {
+    render: function render(props) {
+      if (base && base.config && base.config["continue"]) {
+        // Ensure our configuration gets completed.
+        Promise.resolve().then(function () {
+          if (base && base.config && base.config["continue"]) {
+            base.config["continue"]();
+          }
+        });
+      }
+
+      return authenticated ? React.createElement(C, _extends({}, props, childProps)) : A ? A : null;
+    }
+  }));
+};
+
+AuthenticatedRoute.propTypes = undefined !== "production" ? {
+  component: PropTypes.elementType.isRequired,
+  alternative: PropTypes.element,
+  authenticated: PropTypes.bool.isRequired,
+  props: PropTypes.object
+} : {};
+export default AuthenticatedRoute;

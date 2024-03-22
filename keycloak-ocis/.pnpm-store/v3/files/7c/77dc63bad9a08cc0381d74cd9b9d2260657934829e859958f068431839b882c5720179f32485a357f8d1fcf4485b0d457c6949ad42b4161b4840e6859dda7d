@@ -1,0 +1,82 @@
+import _classCallCheck from "@babel/runtime/helpers/classCallCheck";
+import _createClass from "@babel/runtime/helpers/createClass";
+import _possibleConstructorReturn from "@babel/runtime/helpers/possibleConstructorReturn";
+import _getPrototypeOf from "@babel/runtime/helpers/getPrototypeOf";
+import _inherits from "@babel/runtime/helpers/inherits";
+import React from 'react';
+import PropTypes from 'prop-types';
+import { withStyles } from '@material-ui/core/styles';
+import Button from '@material-ui/core/Button';
+/* eslint-disable react-intl-format/missing-formatted-message */
+
+var styles = function styles(theme) {
+  return {
+    button: {
+      margin: theme.spacing.unit
+    }
+  };
+};
+
+var Example =
+/*#__PURE__*/
+function (_React$Component) {
+  _inherits(Example, _React$Component);
+
+  function Example() {
+    _classCallCheck(this, Example);
+
+    return _possibleConstructorReturn(this, _getPrototypeOf(Example).apply(this, arguments));
+  }
+
+  _createClass(Example, [{
+    key: "render",
+    value: function render() {
+      var classes = this.props.classes;
+      return React.createElement("div", null, React.createElement("div", null, React.createElement(Button, {
+        className: classes.button
+      }, "Default"), React.createElement(Button, {
+        color: "primary",
+        className: classes.button
+      }, "Primary"), React.createElement(Button, {
+        color: "secondary",
+        className: classes.button
+      }, "Secondary"), React.createElement(Button, {
+        disabled: true,
+        className: classes.button
+      }, "Disabled"), React.createElement(Button, {
+        className: classes.button
+      }, "Link")), React.createElement("div", null, React.createElement(Button, {
+        variant: "contained",
+        className: classes.button
+      }, "Default"), React.createElement(Button, {
+        variant: "contained",
+        color: "primary",
+        className: classes.button
+      }, "Primary"), React.createElement(Button, {
+        variant: "contained",
+        color: "secondary",
+        className: classes.button
+      }, "Secondary"), React.createElement(Button, {
+        variant: "contained",
+        color: "secondary",
+        disabled: true,
+        className: classes.button
+      }, "Disabled"), React.createElement(Button, {
+        variant: "contained",
+        className: classes.button
+      }, "Link")), React.createElement("div", null, React.createElement(Button, {
+        variant: "outlined",
+        className: classes.button
+      }, "Default")));
+    }
+  }]);
+
+  return Example;
+}(React.Component);
+
+Example.propTypes = undefined !== "production" ? {
+  classes: PropTypes.object.isRequired
+} : {};
+export default withStyles(styles, {
+  withTheme: true
+})(Example);

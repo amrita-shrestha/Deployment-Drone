@@ -1,0 +1,402 @@
+import _defineProperty from "@babel/runtime/helpers/defineProperty";
+import _objectWithoutProperties from "@babel/runtime/helpers/objectWithoutProperties";
+import _regeneratorRuntime from "@babel/runtime/regenerator";
+
+function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); keys.push.apply(keys, symbols); } return keys; }
+
+function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; if (i % 2) { ownKeys(Object(source), true).forEach(function (key) { _defineProperty(target, key, source[key]); }); } else if (Object.getOwnPropertyDescriptors) { Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)); } else { ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } } return target; }
+
+import { networkFetch, userRequiredError } from '../common/actions';
+import { fetchUser, receiveUser, ensureRequiredScopes } from '../oidc/actions';
+import { isCallbackRequest } from '../oidc/utils';
+import { KPOP_OIDC_DEFAULT_SCOPE } from '../oidc/constants';
+import { sleep } from '../utils/sleep';
+import { getHeadersFromConfig } from './utils';
+import { KPOP_RECEIVE_CONFIG, KPOP_RESET_CONFIG } from './constants';
+import { setHistory } from './history';
+var basePrefix = '';
+var defaultID = 'general';
+var defaultScope = 'kopano';
+var statefulOptions = {};
+export function receiveConfig(config) {
+  return {
+    type: KPOP_RECEIVE_CONFIG,
+    config: config
+  };
+}
+export function resetConfig() {
+  return {
+    type: KPOP_RESET_CONFIG
+  };
+}
+export function fetchConfigFromServer() {
+  var id = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : defaultID;
+  var scope = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : defaultScope;
+  var retry = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : false;
+  return function (dispatch) {
+    var f = function f() {
+      return dispatch(networkFetch("".concat(basePrefix, "/api/config/v1/").concat(scope, "/").concat(id, "/config.json"), {
+        method: 'GET',
+        headers: getHeadersFromConfig()
+      }, 200, true, false));
+    };
+
+    return new Promise(function _callee(resolve, reject) {
+      var delay, config;
+      return _regeneratorRuntime.async(function _callee$(_context) {
+        while (1) {
+          switch (_context.prev = _context.next) {
+            case 0:
+              delay = 200;
+
+            case 1:
+              if (!true) {
+                _context.next = 21;
+                break;
+              }
+
+              _context.prev = 2;
+              _context.next = 5;
+              return _regeneratorRuntime.awrap(f());
+
+            case 5:
+              config = _context.sent;
+              resolve(config);
+              return _context.abrupt("break", 21);
+
+            case 10:
+              _context.prev = 10;
+              _context.t0 = _context["catch"](2);
+
+              if (retry) {
+                _context.next = 15;
+                break;
+              }
+
+              reject(_context.t0);
+              return _context.abrupt("break", 21);
+
+            case 15:
+              delay = delay >= 3200 ? 5000 : delay * 2;
+              console.warn('failed to fetch config: ' + _context.t0 + ', retrying in ' + delay + 'ms'); // eslint-disable-line no-console
+
+              _context.next = 19;
+              return _regeneratorRuntime.awrap(sleep(delay));
+
+            case 19:
+              _context.next = 1;
+              break;
+
+            case 21:
+            case "end":
+              return _context.stop();
+          }
+        }
+      }, null, null, [[2, 10]]);
+    });
+  };
+}
+export function fetchConfigAndInitializeUser(options) {
+  return function (dispatch) {
+    var _Object$assign = Object.assign({}, {
+      id: defaultID,
+      scope: defaultScope,
+      defaults: null,
+      dispatchError: true,
+      args: {}
+    }, options),
+        id = _Object$assign.id,
+        scope = _Object$assign.scope,
+        defaults = _Object$assign.defaults,
+        requiredScopes = _Object$assign.requiredScopes,
+        dispatchError = _Object$assign.dispatchError,
+        args = _Object$assign.args,
+        withUserLazy = _Object$assign.withUserLazy,
+        history = _Object$assign.history;
+
+    if (history) {
+      setHistory(history);
+    }
+
+    return dispatch(fetchConfigFromServer(id, scope, true)).then(function _callee2(config) {
+      return _regeneratorRuntime.async(function _callee2$(_context2) {
+        while (1) {
+          switch (_context2.prev = _context2.next) {
+            case 0:
+              if (!defaults) {
+                _context2.next = 8;
+                break;
+              }
+
+              if (!(typeof defaults === 'function')) {
+                _context2.next = 7;
+                break;
+              }
+
+              _context2.next = 4;
+              return _regeneratorRuntime.awrap(defaults(config));
+
+            case 4:
+              config = _context2.sent;
+              _context2.next = 8;
+              break;
+
+            case 7:
+              config = Object.assign({}, defaults, config);
+
+            case 8:
+              // Inject OIDC always.
+              config.oidc = Object.assign({}, {
+                iss: '',
+                // If empty, current host is used.
+                scope: KPOP_OIDC_DEFAULT_SCOPE
+              }, config.oidc);
+              return _context2.abrupt("return", config);
+
+            case 10:
+            case "end":
+              return _context2.stop();
+          }
+        }
+      });
+    }).then(function _callee3(config) {
+      return _regeneratorRuntime.async(function _callee3$(_context3) {
+        while (1) {
+          switch (_context3.prev = _context3.next) {
+            case 0:
+              _context3.next = 2;
+              return _regeneratorRuntime.awrap(dispatch(receiveConfig(config)));
+
+            case 2:
+              return _context3.abrupt("return", config);
+
+            case 3:
+            case "end":
+              return _context3.stop();
+          }
+        }
+      });
+    }).then(function (config) {
+      Object.assign(statefulOptions, {
+        requiredScopes: requiredScopes,
+        args: args
+      }); // Callback support with lazy user logon trigger.
+
+      var action = function action(opts) {
+        return dispatch(initializeUserWithConfig(config, opts));
+      };
+
+      if (withUserLazy) {
+        config["continue"] = function _callee4() {
+          var opts,
+              user,
+              _args4 = arguments;
+          return _regeneratorRuntime.async(function _callee4$(_context4) {
+            while (1) {
+              switch (_context4.prev = _context4.next) {
+                case 0:
+                  opts = _args4.length > 0 && _args4[0] !== undefined ? _args4[0] : {};
+                  delete config["continue"];
+                  _context4.prev = 2;
+                  _context4.next = 5;
+                  return _regeneratorRuntime.awrap(action(opts));
+
+                case 5:
+                  user = _context4.sent;
+                  return _context4.abrupt("return", {
+                    config: config,
+                    user: user
+                  });
+
+                case 9:
+                  _context4.prev = 9;
+                  _context4.t0 = _context4["catch"](2);
+
+                  if (!(opts.dispatchError || opts.dispatchError === undefined)) {
+                    _context4.next = 18;
+                    break;
+                  }
+
+                  // Dispatch by default, when continue actions fails.
+                  console.error('failed to continue config initialization', _context4.t0); // eslint-disable-line no-console
+
+                  _context4.next = 15;
+                  return _regeneratorRuntime.awrap(dispatch(userRequiredError()));
+
+                case 15:
+                  return _context4.abrupt("return", {
+                    config: config,
+                    user: undefined
+                  });
+
+                case 18:
+                  throw _context4.t0;
+
+                case 19:
+                case "end":
+                  return _context4.stop();
+              }
+            }
+          }, null, null, [[2, 9]]);
+        };
+
+        if (!isCallbackRequest()) {
+          // Fast path, lazy user outside of callbacl.
+          return {
+            config: config,
+            user: undefined
+          };
+        }
+      } // Either not lazy or in callback.
+
+
+      return action({
+        dispatchError: dispatchError
+      }).then(function (user) {
+        if (user && withUserLazy) {
+          // Done already, remove callback.
+          delete config["continue"];
+        }
+
+        return {
+          config: config,
+          user: user
+        };
+      })["catch"](function (reason) {
+        if (withUserLazy && config["continue"]) {
+          // Ignore error when lazy and with continue callback trigger.
+          console.debug('failed to initialize user (but lazy): ' + reason); // eslint-disable-line no-console
+
+          return {
+            config: config,
+            user: undefined
+          };
+        }
+
+        throw new Error('failed to initialize user: ' + reason);
+      });
+    });
+  };
+}
+export function initializeUserWithConfig(config) {
+  var options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
+  return function _callee5(dispatch) {
+    var _Object$assign2, args, dispatchError, requiredScopes, other, user, fetchUserArgs, _dispatchError$fetchU, reallyDispatchError, ensuredScopes;
+
+    return _regeneratorRuntime.async(function _callee5$(_context5) {
+      while (1) {
+        switch (_context5.prev = _context5.next) {
+          case 0:
+            _Object$assign2 = Object.assign({}, {
+              args: {},
+              dispatchError: true
+            }, statefulOptions, options), args = _Object$assign2.args, dispatchError = _Object$assign2.dispatchError, requiredScopes = _Object$assign2.requiredScopes, other = _objectWithoutProperties(_Object$assign2, ["args", "dispatchError", "requiredScopes"]);
+            user = null;
+            fetchUserArgs = args;
+
+            if (!config.user) {
+              _context5.next = 9;
+              break;
+            }
+
+            _context5.next = 6;
+            return _regeneratorRuntime.awrap(dispatch(receiveUser(config.user)).then(function () {
+              return config.user;
+            }));
+
+          case 6:
+            user = _context5.sent;
+            _context5.next = 16;
+            break;
+
+          case 9:
+            if (!(typeof fetchUserArgs === 'function')) {
+              _context5.next = 13;
+              break;
+            }
+
+            _context5.next = 12;
+            return _regeneratorRuntime.awrap(args(config, other));
+
+          case 12:
+            fetchUserArgs = _context5.sent;
+
+          case 13:
+            _context5.next = 15;
+            return _regeneratorRuntime.awrap(dispatch(fetchUser(fetchUserArgs)));
+
+          case 15:
+            user = _context5.sent;
+
+          case 16:
+            if (!(!user || user.expired)) {
+              _context5.next = 25;
+              break;
+            }
+
+            _dispatchError$fetchU = _objectSpread({
+              // NOTE(longsleep): This is complicated shit, since fetchUserArgs can
+              // contain additional options when coming from an OIDC callbacl request,
+              // this are applied here as well.
+              dispatchError: dispatchError
+            }, fetchUserArgs), reallyDispatchError = _dispatchError$fetchU.dispatchError;
+
+            if (!reallyDispatchError) {
+              _context5.next = 24;
+              break;
+            }
+
+            _context5.next = 21;
+            return _regeneratorRuntime.awrap(dispatch(userRequiredError()));
+
+          case 21:
+            return _context5.abrupt("return", user);
+
+          case 24:
+            throw new Error('no user or user expired');
+
+          case 25:
+            ensuredScopes = requiredScopes;
+
+            if (!(ensuredScopes === undefined)) {
+              _context5.next = 30;
+              break;
+            }
+
+            // If not set, all requested scopes are required.
+            ensuredScopes = config.oidc.scope.split(' ');
+            _context5.next = 34;
+            break;
+
+          case 30:
+            if (!(typeof ensuredScopes === 'function')) {
+              _context5.next = 34;
+              break;
+            }
+
+            _context5.next = 33;
+            return _regeneratorRuntime.awrap(ensuredScopes(config, user));
+
+          case 33:
+            ensuredScopes = _context5.sent;
+
+          case 34:
+            if (!ensuredScopes) {
+              _context5.next = 37;
+              break;
+            }
+
+            _context5.next = 37;
+            return _regeneratorRuntime.awrap(dispatch(ensureRequiredScopes(user, ensuredScopes, dispatchError)));
+
+          case 37:
+            return _context5.abrupt("return", user);
+
+          case 38:
+          case "end":
+            return _context5.stop();
+        }
+      }
+    });
+  };
+}

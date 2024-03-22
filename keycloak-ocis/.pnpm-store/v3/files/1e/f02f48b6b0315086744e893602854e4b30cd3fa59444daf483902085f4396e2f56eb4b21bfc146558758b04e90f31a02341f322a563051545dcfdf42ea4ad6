@@ -1,0 +1,125 @@
+import _extends from "@babel/runtime/helpers/extends";
+import _objectWithoutProperties from "@babel/runtime/helpers/objectWithoutProperties";
+import React from 'react';
+import PropTypes from 'prop-types';
+import { FormattedMessage, injectIntl, intlShape } from 'react-intl';
+import { withStyles } from '@material-ui/core/styles';
+import Button from '@material-ui/core/Button';
+import Dialog from '@material-ui/core/Dialog';
+import DialogActions from '@material-ui/core/DialogActions';
+import DialogContent from '@material-ui/core/DialogContent';
+import DialogContentText from '@material-ui/core/DialogContentText';
+import DialogTitle from '@material-ui/core/DialogTitle';
+import withMobileDialog from '@material-ui/core/withMobileDialog';
+import errorShape from '../shapes/error';
+
+var styles = function styles() {
+  return {
+    paper: {
+      minWidth: 'max(300px, 30%)'
+    }
+  };
+};
+
+var _ref =
+/*#__PURE__*/
+React.createElement(DialogContentText, {
+  variant: "body2",
+  key: "fatal-suffix"
+}, React.createElement(FormattedMessage, {
+  id: "kpop.fatalErrorDialog.message",
+  defaultMessage: "This is a fatal error and the app needs to be reloaded."
+}));
+
+var FatalErrorDialog = React.forwardRef(function FatalErrorDialog(props, ref) {
+  var classes = props.classes,
+      intl = props.intl,
+      onReloadClick = props.onReloadClick,
+      fullScreen = props.fullScreen,
+      error = props.error,
+      other = _objectWithoutProperties(props, ["classes", "intl", "onReloadClick", "fullScreen", "error"]);
+
+  var suffixes = [];
+
+  if (!error.withoutFatalSuffix) {
+    suffixes.push(_ref);
+  } // Translation support.
+
+
+  var message = error.message,
+      detail = error.detail,
+      values = error.values,
+      reloadButtonText = error.reloadButtonText;
+
+  if (reloadButtonText && typeof reloadButtonText !== 'string') {
+    reloadButtonText = intl.formatMessage(reloadButtonText, values);
+  }
+
+  if (!reloadButtonText) {
+    reloadButtonText = React.createElement(FormattedMessage, {
+      id: "kpop.fatalErrorDialog.reloadButton.text",
+      defaultMessage: "Reload",
+      values: values
+    });
+  }
+
+  if (message && typeof message !== 'string') {
+    message = intl.formatMessage(message, values);
+  }
+
+  if (detail && typeof detail !== 'string') {
+    detail = intl.formatMessage(detail, values);
+  }
+
+  return React.createElement(Dialog, _extends({
+    fullScreen: fullScreen,
+    PaperProps: {
+      className: classes.paper
+    },
+    ref: ref
+  }, other, {
+    "aria-labelledby": "kpop-fatal-error-dialog-title"
+  }), React.createElement(DialogTitle, {
+    id: "kpop-fatal-error-dialog-title"
+  }, message), React.createElement(DialogContent, null, React.createElement(DialogContentText, {
+    gutterBottom: true
+  }, detail), suffixes), React.createElement(DialogActions, null, React.createElement(Button, {
+    onClick: onReloadClick,
+    color: "primary",
+    autoFocus: true
+  }, reloadButtonText)));
+});
+FatalErrorDialog.propTypes = undefined !== "production" ? {
+  /**
+   * Useful to extend the style applied to components.
+   */
+  classes: PropTypes.object.isRequired,
+
+  /**
+   * Internationalization support.
+   */
+  intl: intlShape.isRequired,
+
+  /**
+   * The error what will be shown.
+   */
+  error: errorShape.isRequired,
+
+  /**
+   * Callback fired when the reload button is clicked.
+   */
+  onReloadClick: PropTypes.func.isRequired,
+
+  /**
+   * If `true`, the dialog will be full-screen
+   */
+  fullScreen: PropTypes.bool,
+
+  /**
+   * If `true`, the FatalErrorDialog is open.
+   */
+  open: PropTypes.bool.isRequired
+} : {};
+export default withMobileDialog()(withStyles(styles, {
+  name: 'KpopFatalErrorDialog'
+})(injectIntl(FatalErrorDialog)));

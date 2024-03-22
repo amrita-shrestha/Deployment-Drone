@@ -1,0 +1,111 @@
+import _extends from "@babel/runtime/helpers/extends";
+import _objectWithoutProperties from "@babel/runtime/helpers/objectWithoutProperties";
+import React from 'react';
+import PropTypes from 'prop-types';
+import { withStyles } from '@material-ui/core/styles';
+import Dialog from '@material-ui/core/Dialog';
+import DialogActions from '@material-ui/core/DialogActions';
+import DialogTitle from '@material-ui/core/DialogTitle';
+import { KopanoLogo } from '../logos';
+
+var styles = function styles() {
+  return {
+    kopanoLogo: {
+      height: 48,
+      maxWidth: 160
+    },
+    appLogo: {
+      maxHeight: 160,
+      maxWidth: 160
+    },
+    title: {
+      textAlign: 'center'
+    },
+    actions: {
+      justifyContent: 'center',
+      marginBottom: 20
+    },
+    backdrop: {
+      backgroundColor: 'white'
+    }
+  };
+};
+
+var LogoDialog = React.forwardRef(function LogoDialog(props, ref) {
+  var classes = props.classes,
+      fullScreen = props.fullScreen,
+      open = props.open,
+      actions = props.actions,
+      children = props.children,
+      other = _objectWithoutProperties(props, ["classes", "fullScreen", "open", "actions", "children"]); // FIXME(longsleep): Crappy dom code follows, extracts any image from the
+  // bg element and instead should allow customization somehow.
+
+
+  var logo;
+  var bg = document.getElementById('bg');
+
+  if (bg) {
+    var style = window.getComputedStyle(bg);
+    var bgImage = style.getPropertyValue('background-image');
+
+    if (bgImage) {
+      bgImage = bgImage.substring(5, bgImage.length - 2); // Strips url("...") enclosure.
+
+      logo = React.createElement("img", {
+        src: bgImage,
+        className: classes.appLogo,
+        alt: ""
+      });
+    }
+  }
+
+  if (!logo) {
+    logo = React.createElement("img", {
+      src: KopanoLogo,
+      className: classes.kopanoLogo,
+      alt: "Kopano"
+    });
+  }
+
+  return React.createElement(Dialog, _extends({
+    fullScreen: fullScreen,
+    open: open,
+    BackdropProps: {
+      className: classes.backdrop
+    },
+    ref: ref
+  }, other), React.createElement(DialogTitle, {
+    className: classes.title
+  }, logo), React.createElement(DialogActions, {
+    className: classes.actions
+  }, actions), children);
+});
+LogoDialog.propTypes = undefined !== "production" ? {
+  /**
+   * Useful to extend the style applied to components.
+   */
+  classes: PropTypes.object.isRequired,
+
+  /**
+   * If `true`, the dialog will be full-screen
+   */
+  fullScreen: PropTypes.bool,
+
+  /**
+   * If `true`, the dialog is open.
+   */
+  open: PropTypes.bool.isRequired,
+
+  /**
+   * Additional content of the component, used after the actions.
+   */
+  children: PropTypes.node,
+
+  /**
+   * Actions of the component.
+   */
+  actions: PropTypes.node
+} : {};
+export default withStyles(styles, {
+  name: 'KpopLogoDialog'
+})(LogoDialog);

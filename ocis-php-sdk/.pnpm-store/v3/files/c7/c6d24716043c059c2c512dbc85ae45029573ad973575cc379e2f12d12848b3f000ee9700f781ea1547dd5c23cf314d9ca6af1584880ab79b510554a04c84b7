@@ -1,0 +1,350 @@
+import _regeneratorRuntime from "@babel/runtime/regenerator";
+import _construct from "@babel/runtime/helpers/construct";
+import _classCallCheck from "@babel/runtime/helpers/classCallCheck";
+import _createClass from "@babel/runtime/helpers/createClass";
+import { UserManager as BaseUserManager, Log } from 'oidc-client'; // Setup oidc logging.
+
+Log.logger = console;
+Log.level = Log.WARN;
+var record = {
+  userManager: null,
+  metadata: null,
+  onBeforeSignin: null,
+  onBeforeSignout: null
+};
+export function setLogLevel() {
+  var level = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : Log.WARN;
+  Log.level = level;
+}
+export function newUserManager(config) {
+  var userManager = record.userManager = new UserManager(config);
+  return userManager;
+}
+export function getUserManager() {
+  return record.userManager;
+}
+export function setUserManagerMetadata(userManager, metadata) {
+  if (userManager !== record.userManager) {
+    return;
+  }
+
+  record.metadata = metadata;
+}
+export function getUserManagerMetadata(userManager) {
+  if (userManager !== record.userManager) {
+    return null;
+  }
+
+  return record.metadata;
+}
+export function onBeforeSignin(handler) {
+  record.onBeforeSignin = handler;
+}
+export function onBeforeSignout(handler) {
+  record.onBeforeSignout = handler;
+}
+export var UserManager =
+/*#__PURE__*/
+function () {
+  function UserManager(config) {
+    _classCallCheck(this, UserManager);
+
+    for (var _len = arguments.length, args = new Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
+      args[_key - 1] = arguments[_key];
+    }
+
+    this._um = _construct(BaseUserManager, [config].concat(args));
+  } // Helpers to access sub structure.
+
+
+  _createClass(UserManager, [{
+    key: "signinRedirect",
+    // Public API.
+    value: function signinRedirect() {
+      var _this$_um;
+
+      var _len2,
+          args,
+          _key2,
+          _args = arguments;
+
+      return _regeneratorRuntime.async(function signinRedirect$(_context) {
+        while (1) {
+          switch (_context.prev = _context.next) {
+            case 0:
+              for (_len2 = _args.length, args = new Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
+                args[_key2] = _args[_key2];
+              }
+
+              if (!record.onBeforeSignin) {
+                _context.next = 4;
+                break;
+              }
+
+              _context.next = 4;
+              return _regeneratorRuntime.awrap(record.onBeforeSignin.apply(record, [this].concat(args)));
+
+            case 4:
+              return _context.abrupt("return", (_this$_um = this._um).signinRedirect.apply(_this$_um, args));
+
+            case 5:
+            case "end":
+              return _context.stop();
+          }
+        }
+      }, null, this);
+    }
+  }, {
+    key: "signinRedirectCallback",
+    value: function signinRedirectCallback() {
+      var _this$_um2;
+
+      return (_this$_um2 = this._um).signinRedirectCallback.apply(_this$_um2, arguments);
+    }
+  }, {
+    key: "signinPopup",
+    value: function signinPopup() {
+      var _this$_um3;
+
+      var _len3,
+          args,
+          _key3,
+          _args2 = arguments;
+
+      return _regeneratorRuntime.async(function signinPopup$(_context2) {
+        while (1) {
+          switch (_context2.prev = _context2.next) {
+            case 0:
+              for (_len3 = _args2.length, args = new Array(_len3), _key3 = 0; _key3 < _len3; _key3++) {
+                args[_key3] = _args2[_key3];
+              }
+
+              if (!record.onBeforeSignin) {
+                _context2.next = 4;
+                break;
+              }
+
+              _context2.next = 4;
+              return _regeneratorRuntime.awrap(record.onBeforeSignin.apply(record, [this].concat(args)));
+
+            case 4:
+              return _context2.abrupt("return", (_this$_um3 = this._um).signinPopup.apply(_this$_um3, args));
+
+            case 5:
+            case "end":
+              return _context2.stop();
+          }
+        }
+      }, null, this);
+    }
+  }, {
+    key: "signinPopupCallback",
+    value: function signinPopupCallback() {
+      var _this$_um4;
+
+      return (_this$_um4 = this._um).signinPopupCallback.apply(_this$_um4, arguments);
+    }
+  }, {
+    key: "signinSilent",
+    value: function signinSilent() {
+      var _this$_um5;
+
+      var _len4,
+          args,
+          _key4,
+          _args3 = arguments;
+
+      return _regeneratorRuntime.async(function signinSilent$(_context3) {
+        while (1) {
+          switch (_context3.prev = _context3.next) {
+            case 0:
+              for (_len4 = _args3.length, args = new Array(_len4), _key4 = 0; _key4 < _len4; _key4++) {
+                args[_key4] = _args3[_key4];
+              }
+
+              if (!record.onBeforeSignin) {
+                _context3.next = 4;
+                break;
+              }
+
+              _context3.next = 4;
+              return _regeneratorRuntime.awrap(record.onBeforeSignin.apply(record, [this].concat(args)));
+
+            case 4:
+              return _context3.abrupt("return", (_this$_um5 = this._um).signinSilent.apply(_this$_um5, args));
+
+            case 5:
+            case "end":
+              return _context3.stop();
+          }
+        }
+      }, null, this);
+    }
+  }, {
+    key: "signinSilentCallback",
+    value: function signinSilentCallback() {
+      var _this$_um6;
+
+      return (_this$_um6 = this._um).signinSilentCallback.apply(_this$_um6, arguments);
+    }
+  }, {
+    key: "signoutRedirect",
+    value: function signoutRedirect() {
+      var _this$_um7;
+
+      var _len5,
+          args,
+          _key5,
+          _args4 = arguments;
+
+      return _regeneratorRuntime.async(function signoutRedirect$(_context4) {
+        while (1) {
+          switch (_context4.prev = _context4.next) {
+            case 0:
+              for (_len5 = _args4.length, args = new Array(_len5), _key5 = 0; _key5 < _len5; _key5++) {
+                args[_key5] = _args4[_key5];
+              }
+
+              if (!record.onBeforeSignout) {
+                _context4.next = 4;
+                break;
+              }
+
+              _context4.next = 4;
+              return _regeneratorRuntime.awrap(record.onBeforeSignout.apply(record, [this].concat(args)));
+
+            case 4:
+              return _context4.abrupt("return", (_this$_um7 = this._um).signoutRedirect.apply(_this$_um7, args));
+
+            case 5:
+            case "end":
+              return _context4.stop();
+          }
+        }
+      }, null, this);
+    }
+  }, {
+    key: "signoutRedirectCallback",
+    value: function signoutRedirectCallback() {
+      var _this$_um8;
+
+      return (_this$_um8 = this._um).signoutRedirectCallback.apply(_this$_um8, arguments);
+    }
+  }, {
+    key: "signoutPopup",
+    value: function signoutPopup() {
+      var _this$_um9;
+
+      var _len6,
+          args,
+          _key6,
+          _args5 = arguments;
+
+      return _regeneratorRuntime.async(function signoutPopup$(_context5) {
+        while (1) {
+          switch (_context5.prev = _context5.next) {
+            case 0:
+              for (_len6 = _args5.length, args = new Array(_len6), _key6 = 0; _key6 < _len6; _key6++) {
+                args[_key6] = _args5[_key6];
+              }
+
+              if (!record.onBeforeSignout) {
+                _context5.next = 4;
+                break;
+              }
+
+              _context5.next = 4;
+              return _regeneratorRuntime.awrap(record.onBeforeSignout.apply(record, [this].concat(args)));
+
+            case 4:
+              return _context5.abrupt("return", (_this$_um9 = this._um).signoutPopup.apply(_this$_um9, args));
+
+            case 5:
+            case "end":
+              return _context5.stop();
+          }
+        }
+      }, null, this);
+    }
+  }, {
+    key: "signoutPopupCallback",
+    value: function signoutPopupCallback() {
+      var _this$_um10;
+
+      return (_this$_um10 = this._um).signoutPopupCallback.apply(_this$_um10, arguments);
+    }
+  }, {
+    key: "removeUser",
+    value: function removeUser() {
+      return this._um.removeUser();
+    }
+  }, {
+    key: "getUser",
+    value: function getUser() {
+      return this._um.getUser();
+    }
+  }, {
+    key: "querySessionStatus",
+    value: function querySessionStatus() {
+      var _this$_um11;
+
+      return (_this$_um11 = this._um).querySessionStatus.apply(_this$_um11, arguments);
+    }
+  }, {
+    key: "revokeAccessToken",
+    value: function revokeAccessToken() {
+      return this._um.revokeAccessToken();
+    }
+  }, {
+    key: "startSilentRenew",
+    value: function startSilentRenew() {
+      return this._um.startSilentRenew();
+    }
+  }, {
+    key: "stopSlientRenew",
+    value: function stopSlientRenew() {
+      return this._um.stopSlientRenew();
+    } // Internal functions.
+
+  }, {
+    key: "_clearStaleState",
+    value: function _clearStaleState() {
+      return this._um.clearStaleState();
+    }
+  }, {
+    key: "_getMetadata",
+    value: function _getMetadata() {
+      return this._um.metadataService.getMetadata();
+    }
+  }, {
+    key: "_getCachedMetadata",
+    value: function _getCachedMetadata() {
+      return getUserManagerMetadata(this);
+    }
+  }, {
+    key: "usermanager",
+    get: function get() {
+      return this._um;
+    }
+  }, {
+    key: "settings",
+    get: function get() {
+      return this._um.settings;
+    }
+  }, {
+    key: "events",
+    get: function get() {
+      return this._um.events;
+    }
+  }, {
+    key: "scope",
+    set: function set(value) {
+      // NOTE(longsleep): Upstream oidc-client-js currently has no setter for
+      // scope and since sometimes we want to change the scope after creating
+      // the user manager, this provides a direct accessor to set the scope.
+      this._um.settings._scope = value;
+    }
+  }]);
+
+  return UserManager;
+}();

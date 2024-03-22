@@ -1,0 +1,85 @@
+import _regeneratorRuntime from "@babel/runtime/regenerator";
+import _classCallCheck from "@babel/runtime/helpers/classCallCheck";
+import _createClass from "@babel/runtime/helpers/createClass";
+import _defineProperty from "@babel/runtime/helpers/defineProperty";
+// NOTE(longsleep): Helper for offline/online detection. This might need some
+// more stuff for proper/better derection. See https://www.html5rocks.com/en/mobile/workingoffthegrid/
+// for some hints. Also the offline API seems to be widely supported, so relying
+// on it seems to be a good start (https://caniuse.com/#search=offline).
+var record = {
+  offlineManager: null
+};
+export var OfflineManager =
+/*#__PURE__*/
+function () {
+  function OfflineManager(onOfflineCb, onOnlineCb) {
+    var _this = this;
+
+    _classCallCheck(this, OfflineManager);
+
+    _defineProperty(this, "wasInitiallyOnline", false);
+
+    _defineProperty(this, "wasOnlineBefore", false);
+
+    _defineProperty(this, "wasOnlineOnce", false);
+
+    _defineProperty(this, "wasOfflineOnce", false);
+
+    window.addEventListener('offline', function _callee() {
+      return _regeneratorRuntime.async(function _callee$(_context) {
+        while (1) {
+          switch (_context.prev = _context.next) {
+            case 0:
+              _this.wasOfflineOnce = true;
+              _context.next = 3;
+              return _regeneratorRuntime.awrap(onOfflineCb(_this));
+
+            case 3:
+              _this.wasOnlineBefore = false;
+
+            case 4:
+            case "end":
+              return _context.stop();
+          }
+        }
+      });
+    });
+    window.addEventListener('online', function _callee2() {
+      return _regeneratorRuntime.async(function _callee2$(_context2) {
+        while (1) {
+          switch (_context2.prev = _context2.next) {
+            case 0:
+              _this.wasOnlineOnce = true;
+              _context2.next = 3;
+              return _regeneratorRuntime.awrap(onOnlineCb(_this));
+
+            case 3:
+              _this.wasOnlineBefore = true;
+
+            case 4:
+            case "end":
+              return _context2.stop();
+          }
+        }
+      });
+    });
+    this.wasInitiallyOnline = this.wasOnlineBefore = this.wasOnlineOnce = this.online;
+    this.wasOfflineOnce = !this.online;
+  }
+
+  _createClass(OfflineManager, [{
+    key: "online",
+    get: function get() {
+      return navigator.onLine;
+    }
+  }]);
+
+  return OfflineManager;
+}();
+export function newOfflineManager(onOfflineCb, onOnlineCb) {
+  var offlineManager = record.offlineManager = new OfflineManager(onOfflineCb, onOnlineCb);
+  return offlineManager;
+}
+export function getOfflineManager() {
+  return record.offlineManager;
+}

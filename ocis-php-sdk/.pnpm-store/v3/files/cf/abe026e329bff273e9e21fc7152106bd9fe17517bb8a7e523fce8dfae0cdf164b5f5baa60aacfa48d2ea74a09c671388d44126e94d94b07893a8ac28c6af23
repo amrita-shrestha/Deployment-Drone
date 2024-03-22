@@ -1,0 +1,12 @@
+import React from 'react';
+import createSvgIcon from '../utils/createSvgIcon';
+/* eslint-disable max-len */
+
+import KopanoIconImage from '../../static/icons/kopano-icon.svg';
+export default createSvgIcon(React.createElement("image", {
+  x: "0",
+  y: "0",
+  width: "24",
+  height: "24",
+  xlinkHref: KopanoIconImage
+}));

@@ -1,0 +1,493 @@
+import _regeneratorRuntime from "@babel/runtime/regenerator";
+import _classCallCheck from "@babel/runtime/helpers/classCallCheck";
+import _createClass from "@babel/runtime/helpers/createClass";
+import _possibleConstructorReturn from "@babel/runtime/helpers/possibleConstructorReturn";
+import _getPrototypeOf from "@babel/runtime/helpers/getPrototypeOf";
+import _assertThisInitialized from "@babel/runtime/helpers/assertThisInitialized";
+import _inherits from "@babel/runtime/helpers/inherits";
+import _defineProperty from "@babel/runtime/helpers/defineProperty";
+
+function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); keys.push.apply(keys, symbols); } return keys; }
+
+function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; if (i % 2) { ownKeys(Object(source), true).forEach(function (key) { _defineProperty(target, key, source[key]); }); } else if (Object.getOwnPropertyDescriptors) { Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)); } else { ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } } return target; }
+
+import React from 'react';
+import PropTypes from 'prop-types';
+import { FormattedMessage } from 'react-intl';
+import renderIf from 'render-if';
+import * as Glue from '@gluejs/glue';
+import A2HsAvailableSnack from '../pwa/A2HsAvailableSnack';
+import { errorShape, embeddedShape } from '../shapes';
+import { isInFrame } from '../utils';
+import { triggerA2HsPrompt } from '../pwa/actions';
+import { startSignin } from '../oidc/actions';
+import { glueGlued } from '../common/actions';
+import { initialize as initializeVisibility } from '../visibility/actions';
+import { initialize as initializeOffline } from '../offline/actions';
+import BaseErrorDialog from './BaseErrorDialog';
+import UpdateRequiredDialog from './UpdateRequiredDialog';
+import UpdateAvailableSnack from './UpdateAvailableSnack';
+import { BaseContext } from './BaseContext';
+import SnackbarProvider from './SnackbarProvider';
+import Notifier from './Notifier';
+var defaultConfig = {}; // Default config is empty;
+
+function getDefaultConfig() {
+  return defaultConfig;
+}
+
+var defaultEmbedded = {
+  enabled: false,
+  mode: undefined,
+  wait: true,
+  bound: false
+};
+
+function getDefaultEmbedded(embedded) {
+  var options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
+
+  if (embedded !== undefined) {
+    // Already set up.
+    return embedded;
+  }
+
+  embedded = _objectSpread({}, defaultEmbedded, {}, options);
+
+  if (isInFrame()) {
+    embedded.enabled = true;
+    embedded.mode = ''; // Empty string mode means the simplest of all modes which requires no initialization.
+  }
+
+  return embedded;
+}
+
+var _ref =
+/*#__PURE__*/
+React.createElement(React.Fragment, null, React.createElement("div", {
+  id: "loader"
+}, React.createElement(FormattedMessage, {
+  id: "kpop.loader.initializing.message",
+  defaultMessage: "Initializing..."
+})));
+
+var BaseContainer =
+/*#__PURE__*/
+function (_React$PureComponent) {
+  _inherits(BaseContainer, _React$PureComponent);
+
+  function BaseContainer() {
+    var _getPrototypeOf2;
+
+    var _this;
+
+    _classCallCheck(this, BaseContainer);
+
+    for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
+      args[_key] = arguments[_key];
+    }
+
+    _this = _possibleConstructorReturn(this, (_getPrototypeOf2 = _getPrototypeOf(BaseContainer)).call.apply(_getPrototypeOf2, [this].concat(args)));
+
+    _defineProperty(_assertThisInitialized(_this), "state", {
+      value: {},
+      initialized: false,
+      updateRequired: false
+    });
+
+    _defineProperty(_assertThisInitialized(_this), "initializeOffline", function _callee() {
+      var _this$props, dispatch, withOffline;
+
+      return _regeneratorRuntime.async(function _callee$(_context) {
+        while (1) {
+          switch (_context.prev = _context.next) {
+            case 0:
+              _this$props = _this.props, dispatch = _this$props.dispatch, withOffline = _this$props.withOffline;
+
+              if (!withOffline) {
+                _context.next = 4;
+                break;
+              }
+
+              _context.next = 4;
+              return _regeneratorRuntime.awrap(dispatch(initializeOffline()));
+
+            case 4:
+            case "end":
+              return _context.stop();
+          }
+        }
+      });
+    });
+
+    _defineProperty(_assertThisInitialized(_this), "initializeGlue", function _callee2() {
+      var value, _this$props2, dispatch, events, features;
+
+      return _regeneratorRuntime.async(function _callee2$(_context2) {
+        while (1) {
+          switch (_context2.prev = _context2.next) {
+            case 0:
+              value = _this.state.value;
+              _this$props2 = _this.props, dispatch = _this$props2.dispatch, events = _this$props2.events, features = _this$props2.features;
+
+              if (value.embedded.wait) {
+                _context2.next = 4;
+                break;
+              }
+
+              return _context2.abrupt("return");
+
+            case 4:
+              return _context2.abrupt("return", new Promise(function (resolve) {
+                Glue.enable(window.parent, {
+                  events: events,
+                  features: features,
+                  origins: ['*'],
+                  // TODO(longsleep): Add origin white list to configuration.
+                  onBeforeReady: function onBeforeReady(glue) {
+                    // Glue is ready, set to state, this continues and renders the app.
+                    dispatch(glueGlued(glue));
+
+                    _this.setState({
+                      value: _objectSpread({}, value, {
+                        embedded: _objectSpread({}, value.embedded, {
+                          enabled: true,
+                          mode: glue.mode,
+                          wait: false
+                        })
+                      })
+                    });
+
+                    resolve(glue);
+                  }
+                }).then(function (glue) {
+                  if (glue.mode === undefined) {
+                    // When no Glue, continue just normal.
+                    _this.setState({
+                      value: _objectSpread({}, value, {
+                        embedded: _objectSpread({}, value.embedded, {
+                          wait: false
+                        })
+                      })
+                    });
+                  }
+
+                  resolve(glue);
+                })["catch"](function (err) {
+                  console.error('error while Glue enable', err); // eslint-disable-line no-console
+
+                  resolve(undefined);
+                });
+              }));
+
+            case 5:
+            case "end":
+              return _context2.stop();
+          }
+        }
+      });
+    });
+
+    _defineProperty(_assertThisInitialized(_this), "initializeVisibility", function _callee3(glue) {
+      var _this$props3, dispatch, withVisibility;
+
+      return _regeneratorRuntime.async(function _callee3$(_context3) {
+        while (1) {
+          switch (_context3.prev = _context3.next) {
+            case 0:
+              _this$props3 = _this.props, dispatch = _this$props3.dispatch, withVisibility = _this$props3.withVisibility;
+
+              if (!withVisibility) {
+                _context3.next = 4;
+                break;
+              }
+
+              _context3.next = 4;
+              return _regeneratorRuntime.awrap(dispatch(initializeVisibility(glue)));
+
+            case 4:
+            case "end":
+              return _context3.stop();
+          }
+        }
+      });
+    });
+
+    _defineProperty(_assertThisInitialized(_this), "handleReloadClick", function () {
+      var error = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : null;
+      return function _callee4(event) {
+        return _regeneratorRuntime.async(function _callee4$(_context4) {
+          while (1) {
+            switch (_context4.prev = _context4.next) {
+              case 0:
+                if (event && event.preventDefault) {
+                  event.preventDefault();
+                }
+
+                if (!(error && error.resolver)) {
+                  _context4.next = 4;
+                  break;
+                }
+
+                _context4.next = 4;
+                return _regeneratorRuntime.awrap(error.resolver());
+
+              case 4:
+                window.location.reload();
+
+              case 5:
+              case "end":
+                return _context4.stop();
+            }
+          }
+        });
+      };
+    });
+
+    _defineProperty(_assertThisInitialized(_this), "handleA2HsClick", function () {
+      var dispatch = _this.props.dispatch; // Trigger system prompt.
+
+      dispatch(triggerA2HsPrompt());
+    });
+
+    _defineProperty(_assertThisInitialized(_this), "handleSigninClick", function () {
+      var error = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : null;
+      return function _callee5() {
+        var dispatch;
+        return _regeneratorRuntime.async(function _callee5$(_context5) {
+          while (1) {
+            switch (_context5.prev = _context5.next) {
+              case 0:
+                dispatch = _this.props.dispatch;
+
+                if (!(error && error.resolver)) {
+                  _context5.next = 12;
+                  break;
+                }
+
+                _context5.prev = 2;
+                _context5.next = 5;
+                return _regeneratorRuntime.awrap(error.resolver());
+
+              case 5:
+                _context5.next = 10;
+                break;
+
+              case 7:
+                _context5.prev = 7;
+                _context5.t0 = _context5["catch"](2);
+                console.warn('error while resolving sign-in', _context5.t0); // eslint-disable-line no-console
+
+              case 10:
+                _context5.next = 14;
+                break;
+
+              case 12:
+                _context5.next = 14;
+                return _regeneratorRuntime.awrap(dispatch(startSignin()));
+
+              case 14:
+              case "end":
+                return _context5.stop();
+            }
+          }
+        }, null, null, [[2, 7]]);
+      };
+    });
+
+    return _this;
+  }
+
+  _createClass(BaseContainer, [{
+    key: "componentDidMount",
+    value: function componentDidMount() {
+      var _this2 = this;
+
+      Promise.all([this.initializeGlue().then(function (glue) {
+        return _this2.initializeVisibility(glue);
+      }), this.initializeOffline()]).then(function () {
+        _this2.setState({
+          initialized: true
+        });
+      });
+    }
+  }, {
+    key: "render",
+    value: function render() {
+      var _this$props4 = this.props,
+          dispatch = _this$props4.dispatch,
+          children = _this$props4.children,
+          config = _this$props4.config,
+          readyProp = _this$props4.ready,
+          error = _this$props4.error,
+          updateAvailable = _this$props4.updateAvailable,
+          updateRequiredProp = _this$props4.updateRequired,
+          a2HsAvailable = _this$props4.a2HsAvailable,
+          withSnackbar = _this$props4.withSnackbar,
+          notifications = _this$props4.notifications;
+      var _this$state = this.state,
+          initialized = _this$state.initialized,
+          updateRequiredState = _this$state.updateRequired;
+      var embedded = this.state.value.embedded;
+      var updateRequired = updateRequiredProp || updateRequiredState;
+      var ready = readyProp && initialized && !embedded.wait && !updateRequired && config;
+      var readyAndNotFatalError = ready && (!error || !error.fatal);
+      var ifReady = renderIf(readyAndNotFatalError);
+      var ifNotReady = renderIf(!ready);
+      var ifFatalError = renderIf(error && error.fatal);
+      var ifUpdateAvailable = renderIf(updateAvailable && !updateRequired);
+      var ifUpdateRequired = renderIf(updateRequired);
+      var ifA2HsAvailable = renderIf(a2HsAvailable && !updateAvailable && !updateRequired);
+      var ifNotifications = renderIf(notifications !== undefined);
+      return React.createElement(BaseContext.Provider, {
+        value: this.state.value
+      }, React.createElement(SnackbarProvider, {
+        withSnackbar: withSnackbar
+      }, ifNotifications(React.createElement(Notifier, {
+        dispatch: dispatch,
+        notifications: notifications
+      })), ifReady(children), ifNotReady(_ref), ifFatalError(React.createElement(BaseErrorDialog, {
+        error: error,
+        onSigninClick: this.handleSigninClick(error),
+        onReloadClick: this.handleReloadClick(error)
+      })), ifUpdateAvailable(React.createElement(UpdateAvailableSnack, {
+        onReloadClick: this.handleReloadClick()
+      })), ifUpdateRequired(React.createElement(UpdateRequiredDialog, {
+        open: true,
+        fullWidth: true,
+        maxWidth: false,
+        disableBackdropClick: true,
+        disableEscapeKeyDown: true,
+        PaperProps: {
+          elevation: 0
+        },
+        onReloadClick: this.handleReloadClick(),
+        updateAvailable: updateAvailable
+      })), ifA2HsAvailable(React.createElement(A2HsAvailableSnack, {
+        onAddClick: this.handleA2HsClick
+      }))));
+    }
+  }], [{
+    key: "getDerivedStateFromProps",
+    value: function getDerivedStateFromProps(props, state) {
+      var config = props.config,
+          withGlue = props.withGlue,
+          embedded = props.embedded,
+          currentVersion = props.currentVersion;
+
+      if (config !== undefined && state.value.config === config) {
+        return null;
+      }
+
+      return {
+        updateRequired: config && config.minimumVersion && config.minimumVersion > currentVersion,
+        value: {
+          config: config ? config : getDefaultConfig(),
+          embedded: embedded ? embedded : getDefaultEmbedded(state.value.embedded, {
+            wait: !!withGlue
+          })
+        }
+      };
+    }
+  }]);
+
+  return BaseContainer;
+}(React.PureComponent);
+
+BaseContainer.defaultProps = {
+  withGlue: true,
+  withVisibility: true,
+  withOffline: true,
+  currentVersion: 1
+};
+BaseContainer.propTypes = undefined !== "production" ? {
+  /**
+   * The content of the component.
+   */
+  children: PropTypes.node.isRequired,
+
+  /**
+   * A dispatch function, for example from redux.
+   */
+  dispatch: PropTypes.func.isRequired,
+
+  /**
+   * If true the component with also be add a snackbar.
+   */
+  withSnackbar: PropTypes.bool,
+
+  /**
+   * If true the component will show its content.
+   */
+  ready: PropTypes.bool.isRequired,
+
+  /**
+   * If an error is provided, the component will show an error dialog.
+   */
+  error: errorShape,
+
+  /**
+   * If true the component will show a notification that an update is available.
+   */
+  updateAvailable: PropTypes.bool,
+
+  /**
+   * If true the component will show a update required message.
+   */
+  updateRequired: PropTypes.bool,
+
+  /**
+   * A numeric version which is used to force automatic app update when a
+   * higher number is set as config.minimumVersion.
+   */
+  currentVersion: PropTypes.number.isRequired,
+
+  /**
+   * If true the component will showa notification that the app can be installed
+   * to the home screen (Progressive web app app to home screen a2hs).
+   */
+  a2HsAvailable: PropTypes.bool,
+
+  /**
+   * The app configuration object. This value is made available by the
+   * integrated BaseContext.
+   */
+  config: PropTypes.object,
+
+  /**
+   * The app embedded object. This value is made available by the integrated
+   * BaseContext and contains helpers and information if the app is running
+   * embedded within another app.
+   */
+  embedded: embeddedShape,
+
+  /**
+   * Feature function to expose to apps via Glue.
+   */
+  features: PropTypes.object,
+
+  /**
+   * The events available for apps via Glue.
+   */
+  events: PropTypes.arrayOf(PropTypes.string),
+
+  /**
+   * Notifications array. If this is set, automatically creates a Notifier.
+   */
+  notifications: PropTypes.array,
+
+  /**
+   * Wether or not to initialize Glue.
+   */
+  withGlue: PropTypes.bool,
+
+  /**
+   * Wether or not to initialize the visibility manager.
+   */
+  withVisibility: PropTypes.bool,
+
+  /**
+   * Wether or not to initialize the offline manager.
+   */
+  withOffline: PropTypes.bool
+} : {};
+export default BaseContainer;

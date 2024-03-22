@@ -1,0 +1,439 @@
+import _extends from "@babel/runtime/helpers/extends";
+import _objectWithoutProperties from "@babel/runtime/helpers/objectWithoutProperties";
+import _regeneratorRuntime from "@babel/runtime/regenerator";
+import _classCallCheck from "@babel/runtime/helpers/classCallCheck";
+import _createClass from "@babel/runtime/helpers/createClass";
+import _possibleConstructorReturn from "@babel/runtime/helpers/possibleConstructorReturn";
+import _getPrototypeOf from "@babel/runtime/helpers/getPrototypeOf";
+import _assertThisInitialized from "@babel/runtime/helpers/assertThisInitialized";
+import _inherits from "@babel/runtime/helpers/inherits";
+import _defineProperty from "@babel/runtime/helpers/defineProperty";
+import _slicedToArray from "@babel/runtime/helpers/slicedToArray";
+import _toConsumableArray from "@babel/runtime/helpers/toConsumableArray";
+import React from 'react';
+import PropTypes from 'prop-types';
+import { IntlProvider } from 'react-intl';
+import ISO6391 from 'iso-639-1';
+import { defineLocale } from '../../i18n/locales';
+import { initializeIntl } from './intl';
+import { parseParams } from '../utils';
+import { defaultLocale } from '../common/constants';
+
+var defaultLocalesFromBrowser = function () {
+  if (navigator.languages) {
+    return navigator.languages;
+  }
+
+  if (navigator.language) {
+    return [navigator.language];
+  }
+
+  return [defaultLocale];
+}(); // NOTE(longsleep): Certain locales are considered aliases to more specific
+// locales. Locales are using BCP 47 format (https://tools.ietf.org/html/rfc5646).
+
+
+function mapLocale(locale) {
+  switch (locale) {
+    case 'pt':
+      // Map plain pt to Portugal.
+      return 'pt-PT';
+
+    case 'zh':
+      // Map plain zh to China.
+      return 'zh-CN';
+
+    default:
+      return locale;
+  }
+} // NOTE(longsleep): Locales are using BCP 47 format (https://tools.ietf.org/html/rfc5646).
+
+
+function mapNativeCountryName(locale, code) {
+  switch (locale) {
+    case 'en-GB':
+      return 'UK';
+
+    case 'pt-PT':
+      return 'Portugal';
+
+    case 'pt-BR':
+      return 'Brasil';
+
+    case 'fr-CA':
+      return 'Canada';
+
+    case 'es-419':
+      return 'Latinoamérica';
+
+    case 'zh-HK':
+      return '香港';
+
+    case 'zh-CN':
+      return '简体';
+
+    case 'zh-TW':
+      return '繁體';
+
+    default:
+      return code;
+  }
+}
+
+function supportedLocale(requestedLocales, messages) {
+  if (!messages) {
+    return [defaultLocale, {}];
+  } // Filter locale.
+
+
+  var locales = [].concat(_toConsumableArray(requestedLocales), _toConsumableArray(defaultLocalesFromBrowser), [defaultLocale]);
+  var _iteratorNormalCompletion = true;
+  var _didIteratorError = false;
+  var _iteratorError = undefined;
+
+  try {
+    for (var _iterator = locales[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+      var l = _step.value;
+
+      if (!l) {
+        continue;
+      }
+
+      var _l$replace$split = l.replace('_', '-').split('-', 2),
+          _l$replace$split2 = _slicedToArray(_l$replace$split, 2),
+          base = _l$replace$split2[0],
+          country = _l$replace$split2[1];
+
+      l = base.toLowerCase();
+
+      if (country) {
+        l += '-' + country.toUpperCase();
+      }
+
+      l = mapLocale(l);
+      var k = l;
+
+      if (!messages[k]) {
+        if (k === 'en') {
+          // Use default locale when requesting plain english and not explicitly
+          // supported in messages.
+          l = k = defaultLocale;
+        } else {
+          // Unsupported. Check if we can fallback to a parent language.
+          if (!messages[base]) {
+            continue;
+          } else {
+            k = l = base;
+          }
+        }
+      }
+
+      return [l, messages[k] ? messages[k] : {}];
+    }
+  } catch (err) {
+    _didIteratorError = true;
+    _iteratorError = err;
+  } finally {
+    try {
+      if (!_iteratorNormalCompletion && _iterator["return"] != null) {
+        _iterator["return"]();
+      }
+    } finally {
+      if (_didIteratorError) {
+        throw _iteratorError;
+      }
+    }
+  }
+
+  return [defaultLocale, {}];
+}
+
+var localeCompare = function () {
+  var supportsLocales = false;
+
+  try {
+    'foo'.localeCompare('bar', 'i');
+  } catch (e) {
+    supportsLocales = e.name === 'RangeError';
+  }
+
+  if (supportsLocales) {
+    return function (a, b, locales, options) {
+      return ('' + a).localeCompare(b, locales, options);
+    };
+  } else {
+    return function (a, b) {
+      return ('' + a).localeCompare(b);
+    };
+  }
+}();
+
+function getDefaultLocales(locale, storageKey, queryKey) {
+  if (locale) {
+    return [locale];
+  }
+
+  if (queryKey) {
+    var locales = parseParams(window.location.search.substr(1))[queryKey];
+
+    if (locales) {
+      return locales.split(' ');
+    }
+  }
+
+  if (!window.localStorage || !storageKey) {
+    return [locale];
+  }
+
+  locale = window.localStorage.getItem(storageKey);
+
+  if (locale) {
+    return [locale];
+  }
+
+  return [];
+}
+
+function setDefautLocale(locale, storageKey) {
+  if (!window.localStorage) {
+    return;
+  }
+
+  if (!locale) {
+    window.localStorage.removeItem(storageKey);
+  }
+
+  window.localStorage.setItem(storageKey, locale);
+}
+
+export var IntlContext = React.createContext({
+  languages: [],
+  locale: defaultLocale
+});
+
+var _ref =
+/*#__PURE__*/
+React.createElement("div", {
+  id: "loader"
+}, "...");
+
+var IntlContainer =
+/*#__PURE__*/
+function (_React$PureComponent) {
+  _inherits(IntlContainer, _React$PureComponent);
+
+  function IntlContainer(props) {
+    var _this;
+
+    _classCallCheck(this, IntlContainer);
+
+    _this = _possibleConstructorReturn(this, _getPrototypeOf(IntlContainer).call(this, props));
+
+    _defineProperty(_assertThisInitialized(_this), "handleSetLocale", function (requestedLocale) {
+      var _this$props = _this.props,
+          requireReloadForNewLocale = _this$props.requireReloadForNewLocale,
+          localeStorageKey = _this$props.localeStorageKey;
+      setDefautLocale(requestedLocale, localeStorageKey);
+
+      if (requireReloadForNewLocale) {
+        return Promise.resolve(null);
+      }
+
+      return new Promise(function (resolve) {
+        _this.setState({
+          requestedLocale: requestedLocale
+        }, function () {
+          resolve(_this.state.requestedLocale);
+        });
+      });
+    });
+
+    _this.state = {
+      ready: false,
+      requestedLocale: null,
+      initialized: props.onLocaleChanged ? function _callee(locale) {
+        return _regeneratorRuntime.async(function _callee$(_context) {
+          while (1) {
+            switch (_context.prev = _context.next) {
+              case 0:
+                return _context.abrupt("return", props.onLocaleChanged(locale));
+
+              case 1:
+              case "end":
+                return _context.stop();
+            }
+          }
+        });
+      } : function () {
+        return Promise.resolve();
+      }
+    };
+    return _this;
+  }
+
+  _createClass(IntlContainer, [{
+    key: "componentDidMount",
+    value: function componentDidMount() {
+      var _this2 = this;
+
+      var locale = this.state.locale;
+      initializeIntl().then(this.state.initialized(locale).then(function () {
+        _this2.setState({
+          ready: true
+        });
+      }));
+    }
+  }, {
+    key: "componentDidUpdate",
+    value: function componentDidUpdate(prevProps, prevState) {
+      var onLocaleChanged = this.props.onLocaleChanged;
+      var locale = this.state.locale;
+
+      if (onLocaleChanged && prevState.locale !== locale) {
+        if (onLocaleChanged) {
+          onLocaleChanged(locale);
+        }
+      }
+    }
+  }, {
+    key: "render",
+    value: function render() {
+      var _this$props2 = this.props,
+          children = _this$props2.children,
+          _locale = _this$props2.locale,
+          _messages = _this$props2.messages,
+          other = _objectWithoutProperties(_this$props2, ["children", "locale", "messages"]);
+
+      var _this$state = this.state,
+          locale = _this$state.locale,
+          localeMessages = _this$state.localeMessages,
+          languages = _this$state.languages;
+      var ready = this.state.ready;
+
+      if (!ready) {
+        return _ref // eslint-disable-line react-intl-format/missing-formatted-message
+        ;
+      } // Inject kpop messages.
+
+
+      var allMessages = defineLocale(localeMessages, locale);
+      return React.createElement(IntlProvider, _extends({
+        key: locale,
+        locale: locale,
+        defaultLocale: defaultLocale,
+        messages: allMessages
+      }, other), React.createElement(IntlContext.Provider, {
+        value: {
+          locale: locale,
+          languages: languages,
+          setLocale: this.handleSetLocale
+        }
+      }, children));
+    }
+  }], [{
+    key: "getDerivedStateFromProps",
+    value: function getDerivedStateFromProps(props, state) {
+      var messages = props.messages,
+          propsLocale = props.locale,
+          localeStorageKey = props.localeStorageKey,
+          localeQueryKey = props.localeQueryKey;
+      var requestedLocales = state.requestedLocale ? [state.requestedLocale] : getDefaultLocales(propsLocale, localeStorageKey, localeQueryKey);
+
+      var _supportedLocale = supportedLocale(requestedLocales, messages),
+          _supportedLocale2 = _slicedToArray(_supportedLocale, 2),
+          locale = _supportedLocale2[0],
+          localeMessages = _supportedLocale2[1];
+
+      if (locale === state.locale && messages === state.messages) {
+        return null;
+      }
+
+      var locales = Object.keys(messages);
+      var languages = locales.map(function (locale) {
+        var _locale$split = locale.split('-', 2),
+            _locale$split2 = _slicedToArray(_locale$split, 2),
+            code = _locale$split2[0],
+            country = _locale$split2[1];
+
+        var nativeName = ISO6391.getNativeName(code);
+        nativeName = nativeName[0].toUpperCase() + nativeName.slice(1);
+
+        if (country) {
+          nativeName += ' (' + mapNativeCountryName(locale, country) + ')';
+        }
+
+        return {
+          locale: locale,
+          code: code,
+          country: country,
+          nativeName: nativeName
+        };
+      });
+      languages.sort(function (a, b) {
+        return localeCompare(a.nativeName, b.nativeName, defaultLocalesFromBrowser, {
+          sensitivity: 'base'
+        });
+      });
+      return {
+        locale: locale,
+        localeMessages: localeMessages,
+        messages: messages,
+        languages: languages
+      };
+    }
+  }]);
+
+  return IntlContainer;
+}(React.PureComponent); // NOTE(longsleep): Poor mans way to support parameters - probably remove.
+
+
+IntlContainer.defaultProps = {
+  defaultLocale: defaultLocale,
+  localeStorageKey: 'kpop:ui_locale.default',
+  localeQueryKey: 'ui_locales',
+  messages: {}
+};
+IntlContainer.propTypes = undefined !== "production" ? {
+  /**
+   * The content of the component.
+   */
+  children: PropTypes.node.isRequired,
+
+  /**
+   * The current locale to use for rendering this container.
+   */
+  locale: PropTypes.string,
+
+  /**
+   * The default locale to use for rendering this container.
+   */
+  defaultLocale: PropTypes.string.isRequired,
+
+  /**
+   * The key to use to persistently read and write locale information from. This
+   * value is used with locale storage. If empty, persistency is disabled.
+   */
+  localeStorageKey: PropTypes.string,
+
+  /**
+   * The key of a URL query parameter to use a default locale. If empty, the
+   * query parameters are ignored.
+   */
+  localeQueryKey: PropTypes.string,
+
+  /**
+   * The message to use for the given locale.
+   */
+  messages: PropTypes.object.isRequired,
+
+  /**
+   * Callback fireed when the locale has changed.
+   */
+  onLocaleChanged: PropTypes.func,
+
+  /**
+   * Flag wether or not a locale change gets applied directly or not.
+   */
+  requireReloadForNewLocale: PropTypes.bool
+} : {};
+export default IntlContainer;

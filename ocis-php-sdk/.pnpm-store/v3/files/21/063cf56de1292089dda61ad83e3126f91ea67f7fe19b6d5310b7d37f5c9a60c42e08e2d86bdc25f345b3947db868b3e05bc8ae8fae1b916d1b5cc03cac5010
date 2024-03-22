@@ -1,0 +1,79 @@
+import _classCallCheck from "@babel/runtime/helpers/classCallCheck";
+import _defineProperty from "@babel/runtime/helpers/defineProperty";
+// NOTE(longsleep): Helper for visibility detection. The visibility API seems to
+// be widely supported and is a good start (https://caniuse.com/#search=visibility).
+var record = {
+  visibilityManager: null
+};
+export var VisibilityManager = function VisibilityManager(onChangeCb) {
+  var _this = this;
+
+  var glue = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : null;
+
+  _classCallCheck(this, VisibilityManager);
+
+  _defineProperty(this, "onChangeCb", null);
+
+  _defineProperty(this, "glue", null);
+
+  _defineProperty(this, "initiallyHidden", true);
+
+  _defineProperty(this, "initialVisibilityState", null);
+
+  _defineProperty(this, "hidden", null);
+
+  _defineProperty(this, "visibilityState", null);
+
+  _defineProperty(this, "handleVisibilityChangeEvent", function () {
+    _this.triggerVisibilityUpdate();
+  });
+
+  _defineProperty(this, "getVisibility", function () {
+    return {
+      hidden: document.hidden || _this.glue && _this.glue.hidden,
+      visibilityState: _this.glue && _this.glue.hidden ? 'hidden' : document.visibilityState
+    };
+  });
+
+  _defineProperty(this, "triggerVisibilityUpdate", function () {
+    var _this$getVisibility = _this.getVisibility(),
+        hidden = _this$getVisibility.hidden,
+        visibilityState = _this$getVisibility.visibilityState;
+
+    if (hidden !== _this.hidden || visibilityState !== _this.visibilityState) {
+      _this.hidden = hidden;
+      _this.visibilityState = visibilityState;
+
+      _this.onChangeCb({
+        hidden: hidden,
+        visibilityState: visibilityState,
+        mgr: _this
+      });
+    }
+  });
+
+  this.onChangeCb = onChangeCb;
+  this.glue = glue;
+
+  var _this$getVisibility2 = this.getVisibility(),
+      _hidden = _this$getVisibility2.hidden,
+      _visibilityState = _this$getVisibility2.visibilityState;
+
+  this.initiallyHidden = _hidden;
+  this.initialVisibilityState = _visibilityState; // Register document visibilitiy API.
+
+  document.addEventListener('visibilitychange', this.handleVisibilityChangeEvent);
+
+  if (glue && glue.enabled && 'addEventListener' in glue) {
+    // Glue can control visibiltiy too. Register event for it.
+    glue.addEventListener('glue.visibilitychange', this.handleVisibilityChangeEvent);
+  }
+};
+export function newVisibilityManager(onChangeCb) {
+  var glue = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : null;
+  var visibilityManager = record.visibilityManager = new VisibilityManager(onChangeCb, glue);
+  return visibilityManager;
+}
+export function getVisibilityManager() {
+  return record.visibilityManager;
+}

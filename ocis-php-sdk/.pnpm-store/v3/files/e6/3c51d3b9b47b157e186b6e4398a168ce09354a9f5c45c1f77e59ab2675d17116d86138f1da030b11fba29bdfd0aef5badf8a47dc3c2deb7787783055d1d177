@@ -1,0 +1,107 @@
+import _toConsumableArray from "@babel/runtime/helpers/toConsumableArray";
+import _defineProperty from "@babel/runtime/helpers/defineProperty";
+
+function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); keys.push.apply(keys, symbols); } return keys; }
+
+function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; if (i % 2) { ownKeys(Object(source), true).forEach(function (key) { _defineProperty(target, key, source[key]); }); } else if (Object.getOwnPropertyDescriptors) { Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)); } else { ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } } return target; }
+
+import { KPOP_RECEIVE_CONFIG, KPOP_RESET_CONFIG } from '../config/constants';
+import { KPOP_SERVICE_WORKER_NEW_CONTENT, KPOP_SERVICE_WORKER_REGISTRATION } from '../serviceWorker/constants';
+import { KPOP_RECEIVE_USER } from '../oidc/constants';
+import { KPOP_OFFLINE_ONLINE, KPOP_OFFLINE_OFFLINE } from '../offline/constants';
+import { KPOP_VISIBILITY_CHANGE } from '../visibility/constants';
+import { KPOP_SET_ERROR, KPOP_GLUE_GLUED, KPOP_SNACKBAR_ENQUEUE, KPOP_SNACKBAR_REMOVE, KPOP_SNACKBAR_CLOSE } from './constants';
+var defaultState = {
+  updateAvailable: false,
+  registration: null,
+  glue: null,
+  config: null,
+  user: null,
+  profile: null,
+  error: null,
+  offline: true,
+  hidden: true,
+  notifications: []
+};
+
+function commonReducer() {
+  var state = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : defaultState;
+  var action = arguments.length > 1 ? arguments[1] : undefined;
+
+  switch (action.type) {
+    case KPOP_SET_ERROR:
+      return Object.assign({}, state, {
+        error: action.error
+      });
+
+    case KPOP_GLUE_GLUED:
+      return Object.assign({}, state, {
+        glue: action.glue
+      });
+
+    case KPOP_SERVICE_WORKER_NEW_CONTENT:
+      return Object.assign({}, state, {
+        updateAvailable: true
+      });
+
+    case KPOP_SERVICE_WORKER_REGISTRATION:
+      return Object.assign({}, state, {
+        registration: action.registration
+      });
+
+    case KPOP_RESET_CONFIG:
+      return Object.assign({}, state, {
+        config: null
+      });
+
+    case KPOP_RECEIVE_CONFIG:
+      return Object.assign({}, state, {
+        config: action.config
+      });
+
+    case KPOP_RECEIVE_USER:
+      return Object.assign({}, state, {
+        user: action.user,
+        profile: action.profile
+      });
+
+    case KPOP_OFFLINE_ONLINE:
+    case KPOP_OFFLINE_OFFLINE:
+      return Object.assign({}, state, {
+        offline: action.offline
+      });
+
+    case KPOP_VISIBILITY_CHANGE:
+      return Object.assign({}, state, {
+        hidden: action.hidden
+      });
+
+    case KPOP_SNACKBAR_ENQUEUE:
+      return _objectSpread({}, state, {
+        notifications: [].concat(_toConsumableArray(state.notifications), [_objectSpread({
+          key: action.key
+        }, action.notification)])
+      });
+
+    case KPOP_SNACKBAR_REMOVE:
+      return _objectSpread({}, state, {
+        notifications: state.notifications.filter(function (notification) {
+          return notification.key !== action.key;
+        })
+      });
+
+    case KPOP_SNACKBAR_CLOSE:
+      return _objectSpread({}, state, {
+        notifications: state.notifications.map(function (notification) {
+          return action.dismissAll || notification.key === action.key ? _objectSpread({}, notification, {
+            dismissed: true
+          }) : _objectSpread({}, notification);
+        })
+      });
+
+    default:
+      return state;
+  }
+}
+
+export default commonReducer;

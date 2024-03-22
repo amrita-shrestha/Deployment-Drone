@@ -1,0 +1,160 @@
+import _slicedToArray from "@babel/runtime/helpers/slicedToArray";
+import { getHistory } from '../config/history';
+import settings from './settings';
+export function isSilentRefreshRequest() {
+  return window.location.href.indexOf(settings.silentRedirectURL) === 0;
+}
+export function isSigninCallbackRequest() {
+  return window.location.href.indexOf(settings.redirectURL) === 0;
+}
+export function isSigninPopupCallbackRequest() {
+  return window.location.href.indexOf(settings.popupRedirectURL) === 0;
+}
+export function isPostSignoutCallbackRequest() {
+  return window.location.href.indexOf(settings.postLogoutRedirectURL) === 0;
+}
+export function isPostSignoutPopupCallbackRequest() {
+  return window.location.href.indexOf(settings.popupPostLogoutRedirectURL) === 0;
+}
+export function isCallbackRequest() {
+  return isSigninCallbackRequest() || isSigninPopupCallbackRequest() || isPostSignoutCallbackRequest() || isPostSignoutPopupCallbackRequest();
+}
+export function resetHash() {
+  var h = getHistory();
+  var l = h.location || window.location;
+  h.replaceState(null, '', l.pathname + l.search);
+}
+export function blockAsyncProgress() {
+  // Return a promise this gets neither resolved nor rejected. Any async code
+  // which returns this promise is effectively blocked and will nether yield
+  // any results.
+  return new Promise(function () {}, function () {});
+}
+/* hasScope returns true if the provided user has any of the provided
+ * scope, false otherwise.
+ */
+
+export function hasScope(user) {
+  for (var _len = arguments.length, scopes = new Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
+    scopes[_key - 1] = arguments[_key];
+  }
+
+  return _hasScopes(user, 'any', scopes);
+}
+/* hasScopes returns true if the provided user has all of the provided
+ * scopes, false otherwise.
+ */
+
+export function hasScopes(user) {
+  for (var _len2 = arguments.length, scopes = new Array(_len2 > 1 ? _len2 - 1 : 0), _key2 = 1; _key2 < _len2; _key2++) {
+    scopes[_key2 - 1] = arguments[_key2];
+  }
+
+  return _hasScopes(user, 'all', scopes);
+}
+
+function _hasScopes(user) {
+  var mode = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 'all';
+  var scopes = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : [];
+
+  if (!user || !scopes) {
+    return false;
+  }
+
+  var userScopes = user.scope.split(' ');
+  var _iteratorNormalCompletion = true;
+  var _didIteratorError = false;
+  var _iteratorError = undefined;
+
+  try {
+    for (var _iterator = scopes[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+      var scope = _step.value;
+
+      if (userScopes.indexOf(scope) >= 0) {
+        if (mode === 'any') {
+          return true;
+        }
+      } else {
+        if (mode === 'all') {
+          return false;
+        }
+      }
+    }
+  } catch (err) {
+    _didIteratorError = true;
+    _iteratorError = err;
+  } finally {
+    try {
+      if (!_iteratorNormalCompletion && _iterator["return"] != null) {
+        _iterator["return"]();
+      }
+    } finally {
+      if (_didIteratorError) {
+        throw _iteratorError;
+      }
+    }
+  }
+
+  if (mode === 'all') {
+    return true;
+  }
+
+  return false;
+}
+
+export function openPopupInAuthorityContext(userManager) {
+  // NOTE(longsleep): To ensure that the openend popup is in the same browsing
+  // context like the URL used for sign-in, this pre-opens the popup so it
+  // avoids the get a blank browsing context created by oidc-client-js. This
+  // fixes popup blocker issues when running as a PWA.
+  var md = userManager._getCachedMetadata();
+
+  var url = md && md.check_session_iframe ? md.check_session_iframe : userManager.settings.authority + '/favicon.ico';
+  return openPopupCentered(url, settings.popupWindowTarget, settings.popupWindowFeatures);
+}
+export function openPopupCentered(url, windowName) {
+  var featuresString = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 'width=600,height=600';
+  // Helper to open popup windows centered on the current screen.
+  var targetWidth;
+  var targetHeight; // Parse features.
+
+  var features = featuresString.split(',');
+  features.forEach(function (feature) {
+    var _feature$split = feature.split('=', 2),
+        _feature$split2 = _slicedToArray(_feature$split, 2),
+        name = _feature$split2[0],
+        value = _feature$split2[1];
+
+    switch (name) {
+      case 'width':
+        targetWidth = parseInt(value, 10);
+        break;
+
+      case 'height':
+        targetHeight = parseInt(value, 10);
+        break;
+    }
+  });
+
+  if (!targetWidth || !targetHeight) {
+    throw new Error('no width or height in features');
+  } // Compute shit.
+
+
+  var screenX = typeof window.screenX !== 'undefined' ? window.screenX : window.screenLeft;
+  var screenY = typeof window.screenY !== 'undefined' ? window.screenY : window.screenTop;
+  var outerWidth = typeof window.outerWidth !== 'undefined' ? window.outerWidth : document.documentElement.clientWidth;
+  var outerHeight = typeof window.outerHeight !== 'undefined' ? window.outerHeight : document.documentElement.clientHeight - 22;
+  var left = parseInt(screenX + (outerWidth - targetWidth) / 2, 10);
+  var right = parseInt(screenY + (outerHeight - targetHeight) / 2.5, 10);
+  features.push('left=' + left);
+  features.push('top=' + right); // Open window.
+
+  var popup = window.open(url, windowName, features.join(','));
+
+  if (window.focus) {
+    popup.focus();
+  }
+
+  return popup;
+}

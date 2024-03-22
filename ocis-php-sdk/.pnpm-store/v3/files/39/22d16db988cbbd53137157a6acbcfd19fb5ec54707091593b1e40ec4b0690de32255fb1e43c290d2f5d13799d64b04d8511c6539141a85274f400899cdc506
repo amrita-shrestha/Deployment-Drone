@@ -1,0 +1,46 @@
+import _defineProperty from "@babel/runtime/helpers/defineProperty";
+
+function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); keys.push.apply(keys, symbols); } return keys; }
+
+function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; if (i % 2) { ownKeys(Object(source), true).forEach(function (key) { _defineProperty(target, key, source[key]); }); } else if (Object.getOwnPropertyDescriptors) { Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)); } else { ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } } return target; }
+
+import { getHistory } from '../config/history';
+var state = {
+  idx: 0,
+  state: {}
+};
+
+function getCurrentRoute() {
+  var h = getHistory();
+  var l = h.location || window.location;
+  return l.pathname + l.search + l.hash;
+}
+
+export function restoreOIDCState(s) {
+  if (s.route) {
+    Promise.resolve().then(function () {
+      var h = getHistory();
+      h.replaceState(s.state ? s.state : null, '', s.route);
+    });
+  }
+
+  state.state = s;
+}
+export function updateOIDCState(s) {
+  Object.assign(state.state, s);
+}
+export function applyOIDCOptionsFromState(options) {
+  if (state.state.options) {
+    Object.assign(options, state.state.options);
+  }
+
+  return options;
+}
+export function makeOIDCState() {
+  var h = getHistory();
+  return _objectSpread({
+    id: ++state.idx,
+    route: getCurrentRoute(),
+    state: h.state
+  }, state.state);
+}

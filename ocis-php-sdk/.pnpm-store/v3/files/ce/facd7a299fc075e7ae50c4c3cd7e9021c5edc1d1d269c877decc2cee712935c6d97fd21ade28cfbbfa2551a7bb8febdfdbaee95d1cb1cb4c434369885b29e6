@@ -1,0 +1,48 @@
+html, body {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+}
+
+#bg {
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: white;
+}
+
+#loader {
+  position: absolute;
+  bottom: 6%;
+  left: 50%;
+  font-weight: 400;
+  font-family: "Roboto", "Helvetica", "Arial", sans-serif;
+  color: #666;
+  transform: translate(-50%, -50%);
+}
+
+#loader > a {
+  color: #1e98d7 /* KopanoBlue700 */
+}
+
+#font-preloader {
+  position: absolute;
+  top: -500px;
+  font-weight: 400;
+  color: white;
+  font-family: "Roboto", "Helvetica", "Arial", sans-serif;
+}
+
+#font-preloader > span {
+  font-weight: 500;
+}
+
+#root {
+  height: 100%;
+  display: flex;
+}

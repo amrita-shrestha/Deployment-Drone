@@ -1,0 +1,47 @@
+import _objectWithoutProperties from "@babel/runtime/helpers/objectWithoutProperties";
+import React from 'react';
+import PropTypes from 'prop-types';
+import { SnackbarProvider as NotistackSnackbarProvider } from 'notistack';
+
+function SnackbarProvider(props) {
+  var withSnackbar = props.withSnackbar,
+      children = props.children,
+      other = _objectWithoutProperties(props, ["withSnackbar", "children"]);
+
+  if (!withSnackbar) {
+    return children;
+  }
+
+  return React.createElement(NotistackSnackbarProvider, other, children);
+}
+
+SnackbarProvider.defaultProps = {
+  maxSnack: 3,
+  anchorOrigin: {
+    horizontal: 'center',
+    vertical: 'top'
+  }
+};
+SnackbarProvider.propTypes = undefined !== "production" ? {
+  /**
+   * The content of the component.
+   */
+  children: PropTypes.node.isRequired,
+
+  /**
+   * If true the component with also be add a snackbar, otherwise just its
+   * children.
+   */
+  withSnackbar: PropTypes.bool,
+
+  /**
+   * The maximum number of snaks visible at the same time.
+   */
+  maxSnack: PropTypes.number.isRequired,
+
+  /**
+   * Position of the nach bac.
+   */
+  anchorOrigin: PropTypes.object.isRequired
+} : {};
+export default SnackbarProvider;

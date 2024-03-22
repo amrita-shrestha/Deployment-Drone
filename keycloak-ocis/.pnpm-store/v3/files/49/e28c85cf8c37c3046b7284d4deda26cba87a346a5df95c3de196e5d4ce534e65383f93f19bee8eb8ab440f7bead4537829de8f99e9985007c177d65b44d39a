@@ -1,0 +1,168 @@
+import _classCallCheck from "@babel/runtime/helpers/classCallCheck";
+import _createClass from "@babel/runtime/helpers/createClass";
+import _possibleConstructorReturn from "@babel/runtime/helpers/possibleConstructorReturn";
+import _getPrototypeOf from "@babel/runtime/helpers/getPrototypeOf";
+import _assertThisInitialized from "@babel/runtime/helpers/assertThisInitialized";
+import _inherits from "@babel/runtime/helpers/inherits";
+import _defineProperty from "@babel/runtime/helpers/defineProperty";
+import React from 'react';
+import PropTypes from 'prop-types';
+import { injectIntl, intlShape, defineMessages, FormattedMessage } from 'react-intl';
+import { withStyles } from '@material-ui/core/styles';
+import Button from '@material-ui/core/Button';
+import Snackbar from '@material-ui/core/Snackbar';
+import IconButton from '@material-ui/core/IconButton';
+import CloseIcon from '@material-ui/icons/Close';
+
+var styles = function styles(theme) {
+  return {
+    close: {
+      padding: theme.spacing.unit / 2
+    }
+  };
+};
+
+var translations = defineMessages({
+  closeButtonAriaLabel: {
+    "id": "kpop.a2A2HsAvailableSnack.closeButton.ariaLabel",
+    "defaultMessage": "close"
+  }
+});
+
+var _ref =
+/*#__PURE__*/
+React.createElement(FormattedMessage, {
+  id: "kpop.a2hsAvailableSnack.addButton.text",
+  defaultMessage: "Add"
+});
+
+var _ref2 =
+/*#__PURE__*/
+React.createElement(CloseIcon, null);
+
+var _ref3 =
+/*#__PURE__*/
+React.createElement("span", {
+  id: "kpop-a2hs-available-snack-message-id"
+}, React.createElement(FormattedMessage, {
+  id: "kpop.a2hsAvailableSnack.message",
+  defaultMessage: "Install as app"
+}));
+
+var A2HsAvailableSnack =
+/*#__PURE__*/
+function (_React$PureComponent) {
+  _inherits(A2HsAvailableSnack, _React$PureComponent);
+
+  function A2HsAvailableSnack() {
+    var _getPrototypeOf2;
+
+    var _this;
+
+    _classCallCheck(this, A2HsAvailableSnack);
+
+    for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
+      args[_key] = arguments[_key];
+    }
+
+    _this = _possibleConstructorReturn(this, (_getPrototypeOf2 = _getPrototypeOf(A2HsAvailableSnack)).call.apply(_getPrototypeOf2, [this].concat(args)));
+
+    _defineProperty(_assertThisInitialized(_this), "state", {
+      closed: false
+    });
+
+    _defineProperty(_assertThisInitialized(_this), "handleAddClick", function () {
+      var onAddClick = _this.props.onAddClick;
+
+      _this.setState({
+        closed: true
+      });
+
+      onAddClick();
+    });
+
+    _defineProperty(_assertThisInitialized(_this), "handleClose", function () {
+      _this.setState({
+        closed: true
+      });
+    });
+
+    return _this;
+  }
+
+  _createClass(A2HsAvailableSnack, [{
+    key: "render",
+    value: function render() {
+      var _this$props = this.props,
+          classes = _this$props.classes,
+          anchorOrigin = _this$props.anchorOrigin,
+          open = _this$props.open,
+          intl = _this$props.intl;
+      var closed = this.state.closed;
+      var show = open && !closed;
+      return React.createElement(Snackbar, {
+        anchorOrigin: anchorOrigin,
+        open: show,
+        onClose: this.handleClose,
+        action: [React.createElement(Button, {
+          key: "add",
+          color: "primary",
+          size: "small",
+          onClick: this.handleAddClick
+        }, _ref), React.createElement(IconButton, {
+          key: "close",
+          "aria-label": intl.formatMessage(translations.closeButtonAriaLabel),
+          color: "inherit",
+          className: classes.close,
+          onClick: this.handleClose
+        }, _ref2)],
+        ContentProps: {
+          'aria-describedby': 'kpop-a2hs-available-snack-message-id'
+        },
+        message: _ref3
+      });
+    }
+  }]);
+
+  return A2HsAvailableSnack;
+}(React.PureComponent);
+
+A2HsAvailableSnack.defaultProps = {
+  open: true,
+  anchorOrigin: {
+    vertical: 'bottom',
+    horizontal: 'left'
+  }
+};
+A2HsAvailableSnack.propTypes = undefined !== "production" ? {
+  /**
+   * Useful to extend the style applied to components.
+   */
+  classes: PropTypes.object.isRequired,
+
+  /**
+   * Internationalization api.
+   */
+  intl: intlShape.isRequired,
+
+  /**
+   * The anchor of the `Snackbar`.
+   */
+  anchorOrigin: PropTypes.shape({
+    horizontal: PropTypes.oneOfType([PropTypes.number, PropTypes.oneOf(['left', 'center', 'right'])]),
+    vertical: PropTypes.oneOfType([PropTypes.number, PropTypes.oneOf(['top', 'center', 'bottom'])])
+  }),
+
+  /**
+   * Callback fired when the add button is clicked.
+   */
+  onAddClick: PropTypes.func.isRequired,
+
+  /**
+   * If true, `Snackbar` is open.
+   */
+  open: PropTypes.bool
+} : {};
+export default injectIntl(withStyles(styles, {
+  name: 'KpopA2HsAvailableSnack'
+})(A2HsAvailableSnack));

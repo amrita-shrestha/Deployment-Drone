@@ -1,0 +1,18 @@
+import React from 'react';
+import KopanoIcon from './KopanoIcon';
+import KopanoCalendarIcon from './KopanoCalendarIcon';
+import KopanoContactsIcon from './KopanoContactsIcon';
+import KopanoKonnectIcon from './KopanoKonnectIcon';
+import KopanoMailIcon from './KopanoMailIcon';
+import KopanoMeetIcon from './KopanoMeetIcon';
+import KopanoWebappIcon from './KopanoWebappIcon';
+
+var _ref =
+/*#__PURE__*/
+React.createElement(React.Fragment, null, React.createElement(KopanoIcon, null), React.createElement("br", null), React.createElement(KopanoCalendarIcon, null), React.createElement(KopanoContactsIcon, null), React.createElement(KopanoKonnectIcon, null), React.createElement(KopanoMailIcon, null), React.createElement(KopanoMeetIcon, null), React.createElement(KopanoWebappIcon, null));
+
+function IconGallery() {
+  return _ref;
+}
+
+export default IconGallery;

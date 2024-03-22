@@ -1,0 +1,52 @@
+import _regeneratorRuntime from "@babel/runtime/regenerator";
+var marker = {};
+/**
+ * Wraps any action so it only triggers when the current user has the provided
+ * scope. If the user does not have the scope, either a provided default value
+ * is returned or the action is rejected with error.
+ */
+
+export function requireScope(scope, f) {
+  var defaultValue = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : marker;
+  return function _callee(dispatch, getState) {
+    var user;
+    return _regeneratorRuntime.async(function _callee$(_context) {
+      while (1) {
+        switch (_context.prev = _context.next) {
+          case 0:
+            user = getState().common.user;
+
+            if (!userHasScope(scope, user)) {
+              _context.next = 3;
+              break;
+            }
+
+            return _context.abrupt("return", f(dispatch, getState));
+
+          case 3:
+            if (!(defaultValue === marker)) {
+              _context.next = 5;
+              break;
+            }
+
+            throw new Error("missing scope: ".concat(scope));
+
+          case 5:
+            return _context.abrupt("return", defaultValue);
+
+          case 6:
+          case "end":
+            return _context.stop();
+        }
+      }
+    });
+  };
+}
+export var userHasScope = function userHasScope(scope, user) {
+  if (!scope || !user) {
+    return false;
+  }
+
+  var scopes = user.scope.split(' ');
+  return scopes.includes(scope);
+};

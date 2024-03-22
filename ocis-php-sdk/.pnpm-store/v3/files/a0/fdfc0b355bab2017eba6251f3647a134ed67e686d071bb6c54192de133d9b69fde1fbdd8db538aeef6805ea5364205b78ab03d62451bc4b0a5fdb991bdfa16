@@ -1,0 +1,46 @@
+import _classCallCheck from "@babel/runtime/helpers/classCallCheck";
+import _createClass from "@babel/runtime/helpers/createClass";
+import _possibleConstructorReturn from "@babel/runtime/helpers/possibleConstructorReturn";
+import _getPrototypeOf from "@babel/runtime/helpers/getPrototypeOf";
+import _inherits from "@babel/runtime/helpers/inherits";
+import _defineProperty from "@babel/runtime/helpers/defineProperty";
+import React from 'react';
+import PropTypes from 'prop-types';
+import { IntlContext } from './IntlContainer';
+
+var IfIntld =
+/*#__PURE__*/
+function (_React$PureComponent) {
+  _inherits(IfIntld, _React$PureComponent);
+
+  function IfIntld() {
+    _classCallCheck(this, IfIntld);
+
+    return _possibleConstructorReturn(this, _getPrototypeOf(IfIntld).apply(this, arguments));
+  }
+
+  _createClass(IfIntld, [{
+    key: "render",
+    value: function render() {
+      var languages = this.context.languages;
+
+      if (!languages || !languages.length) {
+        return null;
+      }
+
+      return this.props.children;
+    }
+  }]);
+
+  return IfIntld;
+}(React.PureComponent);
+
+_defineProperty(IfIntld, "contextType", IntlContext);
+
+IfIntld.propTypes = undefined !== "production" ? {
+  /**
+   * The content of the component.
+   */
+  children: PropTypes.node.isRequired
+} : {};
+export default IfIntld;

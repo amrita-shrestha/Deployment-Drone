@@ -1,0 +1,172 @@
+import _extends from "@babel/runtime/helpers/extends";
+import _objectWithoutProperties from "@babel/runtime/helpers/objectWithoutProperties";
+import _classCallCheck from "@babel/runtime/helpers/classCallCheck";
+import _createClass from "@babel/runtime/helpers/createClass";
+import _possibleConstructorReturn from "@babel/runtime/helpers/possibleConstructorReturn";
+import _getPrototypeOf from "@babel/runtime/helpers/getPrototypeOf";
+import _assertThisInitialized from "@babel/runtime/helpers/assertThisInitialized";
+import _inherits from "@babel/runtime/helpers/inherits";
+import _defineProperty from "@babel/runtime/helpers/defineProperty";
+
+function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); keys.push.apply(keys, symbols); } return keys; }
+
+function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; if (i % 2) { ownKeys(Object(source), true).forEach(function (key) { _defineProperty(target, key, source[key]); }); } else if (Object.getOwnPropertyDescriptors) { Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)); } else { ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } } return target; }
+
+import React from 'react';
+import PropTypes from 'prop-types';
+import { withStyles } from '@material-ui/core/styles';
+import List from '@material-ui/core/List';
+import ListItem from '@material-ui/core/ListItem';
+import ListItemIcon from '@material-ui/core/ListItemIcon';
+import ListItemText from '@material-ui/core/ListItemText';
+import Collapse from '@material-ui/core/Collapse';
+import ExpandLess from '@material-ui/icons/ExpandLess';
+import ExpandMore from '@material-ui/icons/ExpandMore';
+import AppsIcon from '@material-ui/icons/Apps';
+import AppsGrid from './AppsGrid';
+import { withBase } from '../BaseContainer/BaseContext';
+import { embeddedShape } from '../shapes';
+
+var styles = function styles() {
+  return {};
+};
+
+var _ref =
+/*#__PURE__*/
+React.createElement(ListItemIcon, null, React.createElement(AppsIcon, null));
+
+var _ref2 =
+/*#__PURE__*/
+React.createElement(ExpandLess, null);
+
+var _ref3 =
+/*#__PURE__*/
+React.createElement(ExpandMore, null);
+
+var AppsSwitcherListItem =
+/*#__PURE__*/
+function (_React$PureComponent) {
+  _inherits(AppsSwitcherListItem, _React$PureComponent);
+
+  function AppsSwitcherListItem() {
+    var _getPrototypeOf2;
+
+    var _this;
+
+    _classCallCheck(this, AppsSwitcherListItem);
+
+    for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
+      args[_key] = arguments[_key];
+    }
+
+    _this = _possibleConstructorReturn(this, (_getPrototypeOf2 = _getPrototypeOf(AppsSwitcherListItem)).call.apply(_getPrototypeOf2, [this].concat(args)));
+
+    _defineProperty(_assertThisInitialized(_this), "state", {
+      open: false
+    });
+
+    _defineProperty(_assertThisInitialized(_this), "handleClick", function () {
+      _this.setState(function (state) {
+        return {
+          open: !state.open
+        };
+      });
+    });
+
+    _defineProperty(_assertThisInitialized(_this), "handleAppClick", function (event, app) {
+      var onAppClick = _this.props.onAppClick;
+
+      if (onAppClick) {
+        onAppClick(event, app);
+      }
+    });
+
+    return _this;
+  }
+
+  _createClass(AppsSwitcherListItem, [{
+    key: "render",
+    value: function render() {
+      var _this$props = this.props,
+          classes = _this$props.classes,
+          label = _this$props.label,
+          AppsGridProps = _this$props.AppsGridProps,
+          config = _this$props.config,
+          embedded = _this$props.embedded,
+          other = _objectWithoutProperties(_this$props, ["classes", "label", "AppsGridProps", "config", "embedded"]);
+
+      if (embedded && embedded.enabled) {
+        // Render nothing if embedded.
+        return null;
+      }
+
+      if (config && config.apps && config.apps.enabled && config.apps.enabled.length === 0) {
+        // Render nothing if no apps are enabled.
+        return null;
+      }
+
+      var appsGridProps = _objectSpread({
+        onAppClick: this.handleAppClick
+      }, AppsGridProps);
+
+      return React.createElement(React.Fragment, null, React.createElement(ListItem, _extends({
+        button: true,
+        onClick: this.handleClick
+      }, other), _ref, React.createElement(ListItemText, {
+        primary: label
+      }), this.state.open ? _ref2 : _ref3), React.createElement(Collapse, {
+        "in": this.state.open,
+        timeout: "auto",
+        unmountOnExit: true
+      }, React.createElement(List, {
+        component: "div",
+        disablePadding: true
+      }, React.createElement(ListItem, {
+        button: true,
+        className: classes.nested
+      }, React.createElement(AppsGrid, appsGridProps)))));
+    }
+  }]);
+
+  return AppsSwitcherListItem;
+}(React.PureComponent);
+
+AppsSwitcherListItem.defaultProps = {
+  label: 'Kopano Apps'
+};
+AppsSwitcherListItem.propTypes = undefined !== "production" ? {
+  /**
+   * Useful to extend the style applied to components.
+   */
+  classes: PropTypes.object.isRequired,
+
+  /**
+   * List item label.
+   */
+  label: PropTypes.string.isRequired,
+
+  /**
+   * Properties applied to the `AppsGrid` element.
+   */
+  AppsGridProps: PropTypes.object,
+
+  /**
+   * Callback fired when the an app is clicked.
+   */
+  onAppClick: PropTypes.func,
+
+  /**
+   * The app configuration object. This value is made available by the
+   * integrated BaseContext.
+   */
+  config: PropTypes.object,
+
+  /**
+   * The app embedded object. This value is made available by the
+   * integrated BaseContext.
+   */
+  embedded: embeddedShape
+} : {};
+export default withBase(withStyles(styles, {
+  name: 'KpopAppsSwitcherListItem'
+})(AppsSwitcherListItem));

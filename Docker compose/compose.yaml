@@ -1,0 +1,92 @@
+services:
+  traefik:
+    image: traefik:2.11.0
+    command:
+      [
+        "--log.level=ERROR",
+        "--api.insecure=true",
+        "--api.dashboard=true",
+        "--pilot.dashboard=false",
+        "--providers.docker=true",
+        "--entrypoints.ocis.address=:9200",
+        "--entrypoints.keycloak.address=:8443",
+        "--providers.docker.exposedbydefault=false",
+        "--entrypoints.websecure.http.tls.options=default",
+      ]
+    ports:
+      - 8080:8080
+      - 9200:9200
+      - 8443:8443
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+    labels:
+      traefik.enable: true
+      traefik.http.routers.traefik.rule: HostRegexp(`{any:.+}`)
+    restart: always
+
+  ocis:
+    image: owncloud/ocis:latest
+    entrypoint:
+      - /bin/sh
+    command: ["-c", "ocis init || true; ocis server"]
+    environment:
+      # Keycloak IDP configuration
+      PROXY_AUTOPROVISION_ACCOUNTS: true
+      PROXY_ROLE_ASSIGNMENT_DRIVER: oidc
+      OCIS_OIDC_ISSUER: https://host.docker.internal:8443/realms/ocis
+      PROXY_OIDC_REWRITE_WELLKNOWN: true
+      WEB_OIDC_CLIENT_ID: web
+      # general config
+      OCIS_URL: https://host.docker.internal:9200
+      OCIS_LOG_LEVEL: error
+      OCIS_INSECURE: true
+      OCIS_ADMIN_USER_ID: ""
+      OCIS_EXCLUDE_RUN_SERVICES: idp
+      GRAPH_ASSIGN_DEFAULT_USER_ROLE: false
+      GRAPH_USERNAME_MATCH: none
+      # PROXY
+      PROXY_TLS: false
+      PROXY_USER_OIDC_CLAIM: preferred_username
+      PROXY_USER_CS3_CLAIM: username
+    extra_hosts:
+      - host.docker.internal:host-gateway
+    labels:
+      traefik.enable: true
+      traefik.http.routers.ocis.tls: true
+      traefik.http.routers.ocis.rule: PathPrefix(`/`)
+      traefik.http.routers.ocis.entrypoints: ocis
+      traefik.http.services.ocis.loadbalancer.server.port: 9200
+
+  postgres:
+    image: postgres:alpine
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_DB: keycloak
+      POSTGRES_USER: keycloak
+      POSTGRES_PASSWORD: keycloak
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:24.0.1
+    command: ["start-dev", "--proxy=edge"]
+    environment:
+      KC_DB: postgres
+      KC_DB_URL: "jdbc:postgresql://postgres:5432/keycloak"
+      KC_DB_USERNAME: keycloak
+      KC_DB_PASSWORD: keycloak
+      KC_FEATURES: impersonation
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
+    extra_hosts:
+      - host.docker.internal:host-gateway
+    labels:
+      traefik.enable: true
+      traefik.http.routers.keycloak.tls: true
+      traefik.http.routers.keycloak.rule: PathPrefix(`/`)
+      traefik.http.routers.keycloak.entrypoints: keycloak
+      traefik.http.services.keycloak.loadbalancer.server.port: 8080
+    depends_on:
+      - postgres
+
+volumes:
+  postgres_data:

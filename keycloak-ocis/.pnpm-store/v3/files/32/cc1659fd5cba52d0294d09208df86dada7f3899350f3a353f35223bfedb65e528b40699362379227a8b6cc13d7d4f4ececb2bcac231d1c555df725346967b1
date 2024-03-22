@@ -1,0 +1,53 @@
+import _classCallCheck from "@babel/runtime/helpers/classCallCheck";
+import _createClass from "@babel/runtime/helpers/createClass";
+var browserHistory = {
+  history: window.history
+};
+/**
+ * Simple wrapper to provide common API for custom history implementations.
+ */
+
+var wrappedHistory =
+/*#__PURE__*/
+function () {
+  function wrappedHistory(h) {
+    _classCallCheck(this, wrappedHistory);
+
+    this.history = h;
+  }
+
+  _createClass(wrappedHistory, [{
+    key: "replaceState",
+    value: function replaceState(state, title, url) {
+      this.history.replace(url, state);
+    }
+  }, {
+    key: "pushState",
+    value: function pushState(state, title, url) {
+      this.history.push(url, state);
+    }
+  }, {
+    key: "state",
+    get: function get() {
+      return this.history.location.state;
+    }
+  }, {
+    key: "location",
+    get: function get() {
+      return this.history.location;
+    }
+  }]);
+
+  return wrappedHistory;
+}();
+
+export function setHistory(history) {
+  if (!('replaceState' in history)) {
+    history = new wrappedHistory(history);
+  }
+
+  browserHistory.history = history;
+}
+export function getHistory() {
+  return browserHistory.history;
+}
