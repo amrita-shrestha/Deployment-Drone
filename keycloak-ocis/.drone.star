@@ -1,10 +1,10 @@
 POSTGRES_ALPINE = "postgres:alpine3.18"
-KEYCLOAK = "quay.io/keycloak/keycloak:22.0.4"
+KEYCLOAK = "quay.io/keycloak/keycloak:25.0.0"
 OC_CI_WAIT_FOR = "owncloudci/wait-for:latest"
 OC_CI_ALPINE = "owncloudci/alpine:latest"
-OC_OCIS = "owncloud/ocis:5.0.0-rc.3"
+OC_OCIS = "owncloud/ocis-rolling:latest"
 OC_CI_GOLANG = "owncloudci/golang:1.22"
-OC_CI_NODEJS = "owncloudci/nodejs:18"
+OC_CI_NODEJS = "owncloudci/nodejs:20"
 OC_UBUNTU = "owncloud/ubuntu:20.04"
 
 OCIS_ENV = {
@@ -66,7 +66,8 @@ def keycloakService():
             "detach": True,
             "environment": {
                 "OCIS_DOMAIN": "ocis:9200",
-                "KC_HOSTNAME": "keycloak:8443",
+                "KC_HOSTNAME": "keycloak",
+                "KC_HOSTNAME_PORT": 8443,
                 "KC_DB": "postgres",
                 "KC_DB_URL": "jdbc:postgresql://postgres:5432/keycloak",
                 "KC_DB_USERNAME": "keycloak",
@@ -80,11 +81,9 @@ def keycloakService():
             "commands": [
                 "cat keycloak-certs/keycloakkey.pem",
                 "ls -al",
-                "pwd",
-                "ls -al",
                 "mkdir -p /opt/keycloak/data/import",
                 "cp ocis-realm.dist.json /opt/keycloak/data/import/ocis-realm.json",
-                "/opt/keycloak/bin/kc.sh start-dev --proxy edge --spi-connections-http-client-default-disable-trust-manager=false --import-realm --health-enabled=true",
+                "/opt/keycloak/bin/kc.sh start-dev --proxy-headers xforwarded --spi-connections-http-client-default-disable-trust-manager=false --import-realm --health-enabled=true",
             ],
             "volumes": [
                 {
@@ -199,7 +198,7 @@ def main(ctx):
         "kind": "pipeline",
         "type": "docker",
         "name": "start-services",
-        "steps": keycloakService() + buildOcis() + ocisService() + e2e_tests(),
+        "steps": keycloakService(),
         "services": postgresService(),
         "trigger": {
             "ref": [
