@@ -1,9 +1,0 @@
-import _extends from "@babel/runtime/helpers/extends";
-import React from 'react';
-import Slide from '@material-ui/core/Slide';
-export var SlideUpTransition = React.forwardRef(function SlideUpTransition(props, ref) {
-  return React.createElement(Slide, _extends({
-    direction: "up",
-    ref: ref
-  }, props));
-});

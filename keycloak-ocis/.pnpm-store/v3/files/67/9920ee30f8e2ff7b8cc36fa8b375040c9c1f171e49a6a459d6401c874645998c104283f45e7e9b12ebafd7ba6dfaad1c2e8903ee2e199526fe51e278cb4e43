@@ -1,3 +1,0 @@
-/*global process: true*/
-var build = "2.2.0" || '0.0.0-no-proper-build';
-export { build };
